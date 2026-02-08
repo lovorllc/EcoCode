@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="hr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rute korisnika - EcoCode Admin</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    
+    <style>
+        :root {
+            /* SVJETLA TEMA */
+            --bg: #f8fafc;
+            --accent-blue: #3b82f6;
+            --accent-glow: #1d4ed8;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --text-main: #0f172a;
+            --text-soft: #64748b;
+            --glass-border: rgba(15, 23, 42, 0.1);
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+            --neon-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+            --map-filter: brightness(1) contrast(1);
+        }
+
+        [data-theme="dark"] {
+            /* TAMNA TEMA */
+            --bg: #030712;
+            --accent-blue: #3b82f6;
+            --accent-glow: #1d4ed8;
+            --card-bg: rgba(17, 24, 39, 0.8);
+            --text-main: #f8fafc;
+            --text-soft: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+            --neon-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+            --map-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3);
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            margin: 0; 
+            background: var(--bg); 
+            color: var(--text-main);
+            overflow: hidden; /* Fix za map layout */
+        }
+
+        /* --- TOPBAR --- */
+        #topbar { 
+            background: var(--card-bg); 
+            backdrop-filter: blur(20px);
+            padding: 0 5%; 
+            height: 75px;
+            border-bottom: 1px solid var(--glass-border); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            position: relative;
+            z-index: 1000;
+        }
+
+        .logo { 
+            text-decoration: none; 
+            font-weight: 800; 
+            font-size: 1.4rem; 
+            color: var(--text-main); 
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo span { color: var(--accent-blue); }
+
+        .user-badge {
+            background: var(--bg);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* --- LAYOUT --- */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            height: calc(100vh - 75px);
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-container { grid-template-columns: 1fr; height: auto; }
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--glass-border);
+            overflow-y: auto;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            letter-spacing: -0.04em;
+        }
+
+        /* --- TRACK CARDS --- */
+        .track-card {
+            background: var(--bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 1.2rem;
+            margin-bottom: 1.2rem;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+
+        .track-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-blue);
+        }
+
+        .track-card.active {
+            border-color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.05);
+            box-shadow: var(--neon-shadow);
+        }
+
+        .track-name { font-weight: 800; font-size: 1.1rem; margin-bottom: 6px; }
+        .track-meta { font-size: 0.85rem; color: var(--text-soft); font-weight: 600; }
+        
+        .track-stats {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 4px 12px;
+            background: var(--accent-blue);
+            color: white;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        /* --- BUTTONS --- */
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        
+        .btn {
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-view { background: var(--accent-blue); color: white; flex: 1; }
+        .btn-delete { background: #fee2e2; color: #ef4444; }
+        .btn-delete:hover { background: #ef4444; color: white; }
+
+        /* --- MAP AREA --- */
+        .map-section { position: relative; background: var(--bg); }
+        #map { height: 100%; width: 100%; filter: var(--map-filter); }
+
+        .back-link {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            z-index: 1000;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 12px 24px;
+            border-radius: 16px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 700;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+        }
+        
+        /* Custom Scrollbar */
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
+
+        .logo-box {
+            width: 40px; height: 40px; 
+            border-radius: 12px; object-fit: contain;
+        }
+
+    </style>
+</head>
+<body>
+
+    <nav id="topbar">
+        <a href="/" class="logo">
+            <img src="/static/logo.png" alt="EcoCode" class="logo-box">
+            EcoCode <span>Admin.</span>
+        </a>
+        <div>
+            {% if get_current_user(request) %}
+                <span class="dev-badge">ADMIN: {{ get_current_user(request) }}</span>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="section-title">Rute korisnika 📍</div>
+            
+            <div id="tracksList">
+                {% if tracks|length == 0 %}
+                    <div style="text-align: center; padding: 50px 20px; color: var(--text-soft);">
+                        <p>Nema spremljenih ruta.</p>
+                    </div>
+                {% else %}
+                    {% for t in tracks %}
+                    <div class="track-card" id="card-{{ t.get('id') }}" onclick="selectTrack('{{ t.get('id') }}')">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <div class="track-name">{{ t.get('name') or ('Ruta #' ~ t.get('id')) }}</div>
+                                <div class="track-meta">📅 {{ t.get('created_at')[:10] }}</div>
+                            </div>
+                            <div style="background: var(--glass-border); padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 800;">
+                                {{ (t.get('activity_type') or 'GPS') | upper }}
+                            </div>
+                        </div>
+
+                        <div class="track-stats">
+                            📏 {{ t.get('distance_km') or 0 }} km
+                        </div>
+
+                        <div class="btn-group">
+                            <button class="btn btn-view">Prikaži</button>
+                            <form method="post" action="/admin/tracks/{{ t.get('id') }}/delete" onsubmit="return confirm('Obriši rutu?');" style="margin:0">
+                                <button type="submit" class="btn btn-delete">🗑️</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </aside>
+
+        <section class="map-section">
+            <div id="map"></div>
+            <a href="/users" class="back-link">← Povratak na listu</a>
+        </section>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script>
+        // SINHRONIZACIJA TEME
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+        var map = L.map('map', { zoomControl: false }).setView([45.815, 15.981], 13);
+        L.control.zoom({ position: 'topright' }).addTo(map);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; CARTO'
+        }).addTo(map);
+
+        var polyline = L.polyline([], { 
+            color: '#3b82f6', 
+            weight: 6, 
+            opacity: 0.8,
+            lineJoin: 'round'
+        }).addTo(map);
+
+        async function selectTrack(trackId) {
+            document.querySelectorAll('.track-card').forEach(c => c.classList.remove('active'));
+            const card = document.getElementById('card-' + trackId);
+            if(card) card.classList.add('active');
+
+            try {
+                const res = await fetch('/api/tracks/' + trackId);
+                const data = await res.json();
+                if(data?.points?.length) {
+                    const pts = data.points.map(p => [p.lat, p.lon]);
+                    polyline.setLatLngs(pts);
+                    map.fitBounds(L.latLngBounds(pts).pad(0.2));
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        window.onload = () => {
+            const first = document.querySelector('.track-card');
+            if(first) first.click();
+        };
+    </script>
+</body>
+</html>

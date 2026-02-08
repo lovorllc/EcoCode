@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="hr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoCode Admin - Alati Sustava</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* SVJETLA TEMA */
+            --bg: #f8fafc;
+            --accent-blue: #3b82f6;
+            --accent-glow: #1d4ed8;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --text-main: #0f172a;
+            --text-soft: #64748b;
+            --glass-border: rgba(15, 23, 42, 0.1);
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+            --input-bg: rgba(255, 255, 255, 0.9);
+            --neon-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+        }
+
+        [data-theme="dark"] {
+            /* TAMNA TEMA */
+            --bg: #030712;
+            --accent-blue: #3b82f6;
+            --accent-glow: #1d4ed8;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-soft: #94a3b8;
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+            --input-bg: rgba(0, 0, 0, 0.3);
+            --neon-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(29, 78, 216, 0.08) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* --- TOPBAR --- */
+        #topbar {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            font-weight: 800; font-size: 1.4rem; color: var(--text-main);
+            text-decoration: none; display: flex; align-items: center; gap: 12px;
+        }
+
+        .logo span { color: var(--accent-blue); }
+
+        .nav-links { display: flex; gap: 20px; align-items: center; }
+        .nav-links a { 
+            text-decoration: none; color: var(--text-soft); font-weight: 600; 
+            font-size: 0.9rem;
+        }
+        .nav-links a:hover { color: var(--accent-blue); }
+
+        .btn-nav-admin {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-glow));
+            color: white !important;
+            padding: 10px 24px;
+            border-radius: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: var(--neon-shadow);
+        }
+
+        /* --- MAIN CONTENT --- */
+        main { max-width: 1200px; margin: 0 auto; width: 100%; padding: 40px 5%; }
+        
+        .hero-text { margin-bottom: 40px; animation: fadeInUp 0.8s ease; }
+        .hero-text small { color: var(--accent-blue); font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em; }
+        .hero-text h1 { font-size: 3rem; font-weight: 800; margin: 5px 0 0; letter-spacing: -0.04em; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- GRID I KARTICE --- */
+        .main-grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 30px; }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border-radius: 28px;
+            padding: 30px;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            box-shadow: var(--shadow);
+        }
+
+        .glass-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 30px; right: 30px; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+        }
+
+        h3 { font-size: 1.2rem; margin-top: 0; margin-bottom: 25px; font-weight: 700; color: var(--text-main); }
+
+        /* --- TABLICA --- */
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px; color: var(--text-soft); border-bottom: 1px solid var(--glass-border); font-size: 0.75rem; text-transform: uppercase; }
+        td { padding: 16px 12px; border-bottom: 1px solid var(--glass-border); font-size: 0.9rem; color: var(--text-main); }
+        tr:hover { background: rgba(59, 130, 246, 0.05); }
+
+        /* --- FORMA --- */
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-size: 0.8rem; font-weight: 600; color: var(--text-soft); }
+        input, select {
+            width: 100%; padding: 14px 18px; background: var(--input-bg);
+            border: 1px solid var(--glass-border); border-radius: 16px;
+            color: var(--text-main); font-family: inherit; font-size: 0.95rem;
+        }
+        input:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+
+        .btn-action {
+            width: 100%; padding: 16px; border-radius: 16px; border: none;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-glow));
+            color: white; font-weight: 800; cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            font-size: 1rem;
+        }
+        .btn-action:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: var(--neon-shadow); }
+
+        .status-badge {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            padding: 4px 10px; border-radius: 8px;
+            font-size: 0.75rem; font-weight: 700;
+        }
+
+        @media (max-width: 950px) { .main-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <nav id="topbar">
+        <a href="/" class="logo">
+            <div style="background: linear-gradient(135deg, var(--accent-blue), var(--accent-glow)); width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-weight: 900; color: white;">A</div>
+            EcoCode <span>Admin</span>
+        </a>
+        <div class="nav-links">
+            <a href="/">Početna</a>
+            <a href="/profile">Profil</a>
+            <a href="/admin" class="btn-nav-admin">Admin Alati</a>
+        </div>
+    </nav>
+
+    <main>
+        <div class="hero-text">
+            <small>Sustavna Kontrola</small>
+            <h1>Alati Sustava</h1>
+        </div>
+
+        <div class="main-grid">
+            <section class="glass-card">
+                <h3>Zadnje Sistemske Aktivnosti</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tip Loga</th>
+                                <th>Korisnik</th>
+                                <th>Status</th>
+                                <th>Vrijeme</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsWrap">
+                            <tr>
+                                <td>DB_BACKUP</td>
+                                <td>System</td>
+                                <td><span class="status-badge">USPJEŠNO</span></td>
+                                <td>16:45:12</td>
+                            </tr>
+                            <tr>
+                                <td>API_AUTH</td>
+                                <td>Admin_Main</td>
+                                <td><span class="status-badge">USPJEŠNO</span></td>
+                                <td>16:40:05</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="glass-card">
+                <h3>Konfiguracija</h3>
+                <div class="input-group">
+                    <label>Mod Rada Sustava</label>
+                    <select>
+                        <option>Produkcija</option>
+                        <option>Održavanje</option>
+                        <option>Debug Mod</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Globalna Obavijest</label>
+                    <input type="text" placeholder="Unesite tekst poruke...">
+                </div>
+                <button class="btn-action">Primijeni Postavke</button>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // Sinhronizacija teme s localStorage (isto kao u tvom primjeru)
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+        console.log("Admin Alati spremni u temi: " + savedTheme);
+    </script>
+</body>
+</html>

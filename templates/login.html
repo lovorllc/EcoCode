@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="hr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prijava - EcoCode</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* SVJETLA ECO TEMA */
+            --bg: #f8fafc;
+            --accent: #10b981;
+            --accent-dark: #059669;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --text-main: #0f172a;
+            --text-soft: #64748b;
+            --glass-border: rgba(16, 185, 129, 0.2);
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+            --input-bg: #f8fafc;
+        }
+
+        [data-theme="dark"] {
+            /* TAMNA ECO GLASS TEMA */
+            --bg: #0f172a;
+            --accent: #34d399;
+            --accent-dark: #10b981;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --text-main: #f8fafc;
+            --text-soft: #94a3b8;
+            --glass-border: rgba(52, 211, 153, 0.15);
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            --input-bg: rgba(0, 0, 0, 0.2);
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 40%),
+                radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.08) 0px, transparent 40%);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* TRANSITION OVERLAY (Usklađen sa zelenom temom) */
+        #transition-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--accent);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 9999; opacity: 0; pointer-events: none;
+        }
+        #transition-overlay.active { opacity: 1; pointer-events: all; }
+
+        .leaf-loader { font-size: 4rem; animation: pulse 1.5s infinite; }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+
+        /* TOPBAR (Usklađen s Home/GPS/Score) */
+        #topbar {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.8rem 5%;
+            position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            font-weight: 800; font-size: 1.5rem; color: var(--text-main);
+            text-decoration: none; display: flex; align-items: center; gap: 12px;
+        }
+        .logo-box {
+            width: 40px; height: 40px; 
+            border-radius: 12px; object-fit: contain;
+        }
+
+        .nav-links { display: flex; gap: 10px; align-items: center; }
+        .nav-links a { 
+            text-decoration: none; color: var(--text-main); font-weight: 600; 
+            font-size: 0.9rem; padding: 8px 16px; border-radius: 12px;
+        }
+        .nav-links a:hover { background: rgba(16, 185, 129, 0.1); color: var(--accent); }
+
+        /* LOGIN CARD */
+        main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+        
+        .login-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            width: 100%; max-width: 440px;
+            padding: 4rem 3rem;
+            border-radius: 32px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            border: 1px solid var(--glass-border);
+            position: relative;
+        }
+        .login-card::before {
+            content: ""; position: absolute; top: 0; left: 40px; right: 40px; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        h1 { margin: 0 0 0.5rem 0; font-size: 2.2rem; font-weight: 800; letter-spacing: -0.04em; }
+
+        .input-group { margin-bottom: 1.5rem; text-align: left; }
+        label { display: block; font-size: 0.75rem; font-weight: 800; margin-bottom: 8px; color: var(--text-soft); text-transform: uppercase; }
+        
+        input {
+            width: 100%; padding: 14px 18px; border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            background: var(--input-bg); color: var(--text-main);
+            font-family: inherit; font-size: 1rem; font-weight: 600;
+        }
+        input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
+
+        #login-btn {
+            width: 100%; padding: 16px; background: var(--accent); color: white;
+            border: none; border-radius: 18px; font-size: 1.1rem; font-weight: 800;
+            cursor: pointer; margin-top: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+        }
+        #login-btn:hover { transform: translateY(-3px); filter: brightness(1.1); }
+
+        .footer-links { margin-top: 2rem; font-size: 0.95rem; color: var(--text-soft); }
+        .footer-links a { color: var(--accent); text-decoration: none; font-weight: 800; }
+
+        footer { padding: 40px; text-align: center; font-size: 0.85rem; color: var(--text-soft); font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <div id="transition-overlay">
+        <div class="leaf-loader">🌿</div>
+        <div style="color: white; font-weight: 800; margin-top: 20px; text-transform: uppercase; letter-spacing: 2px;">Prijava u sustav...</div>
+    </div>
+
+    <nav id="topbar">
+        <a href="/" class="logo">
+            <img src="/static/logo.png" alt="EcoCode" class="logo-box">
+            EcoCode
+        </a>
+        <div class="nav-links">
+            <a href="/">Početna</a>
+            <a href="/insights/gps">GPS</a>
+            <a href="/track">Dnevnik</a>
+            <a href="/signup" style="font-weight: 800; color: var(--accent);">Registracija</a>
+        </div>
+    </nav>
+
+    <main>
+        <div class="login-card">
+            <h1>Dobrodošli! 🌿</h1>
+            <p style="color: var(--text-soft); margin-bottom: 2.5rem; font-weight: 600;">Prijavite se za nastavak vašeg eko putovanja.</p>
+
+            <form id="login-form" action="/login" method="post">
+                <div class="input-group">
+                    <label>Korisničko ime / Email</label>
+                    <input type="text" name="who" placeholder="Korisničko ime" required autofocus>
+                </div>
+
+                <div class="input-group">
+                    <label>Lozinka</label>
+                    <input type="password" name="password" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" id="login-btn">Prijavi se</button>
+            </form>
+
+            <div class="footer-links">
+                Novi ste ovdje? <a href="/signup">Izradite račun</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>&copy; 2026 EcoCode • Čuvamo tvoj digitalni otisak 🌱</footer>
+
+    <script>
+        // Sinkronizacija teme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+        const loginForm = document.getElementById('login-form');
+        const overlay = document.getElementById('transition-overlay');
+
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            overlay.classList.add('active');
+            setTimeout(() => {
+                loginForm.submit();
+            }, 1200);
+        });
+    </script>
+
+</body>
+</html>

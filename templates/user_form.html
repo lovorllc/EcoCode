@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="hr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ 'Uredi' if user else 'Novi' }} Korisnik - EcoCode Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* SVJETLA ECO TEMA */
+            --bg: #f8fafc;
+            --accent: #10b981;
+            --accent-dark: #059669;
+            --text-main: #0f172a;
+            --text-soft: #64748b;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(16, 185, 129, 0.2);
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+            --input-bg: #f8fafc;
+        }
+
+        [data-theme="dark"] {
+            /* TAMNA ECO GLASS TEMA */
+            --bg: #0f172a;
+            --accent: #34d399;
+            --accent-dark: #10b981;
+            --text-main: #f8fafc;
+            --text-soft: #94a3b8;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --glass-border: rgba(52, 211, 153, 0.15);
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            --input-bg: rgba(0, 0, 0, 0.2);
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 40%),
+                radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.08) 0px, transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- TOPBAR --- */
+        #topbar {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            font-weight: 800; font-size: 1.5rem; color: var(--text-main);
+            text-decoration: none; display: flex; align-items: center; gap: 12px;
+        }
+        .logo-box {
+            width: 40px; height: 40px; 
+            border-radius: 12px; object-fit: contain;
+        }
+
+        .nav-links { display: flex; gap: 10px; align-items: center; }
+        .nav-links a { 
+            text-decoration: none; color: var(--text-main); font-weight: 600; 
+            font-size: 0.9rem; padding: 8px 16px; border-radius: 12px;
+        }
+        .nav-links a:hover { background: rgba(16, 185, 129, 0.1); color: var(--accent); }
+
+        /* --- MAIN CONTENT --- */
+        main {
+            flex: 1;
+            max-width: 900px;
+            width: 95%;
+            margin: 3rem auto;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .admin-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border-radius: 32px;
+            padding: 3rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            position: relative;
+        }
+        .admin-card::before {
+            content: ""; position: absolute; top: 0; left: 40px; right: 40px; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        .header-section {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 3rem;
+        }
+
+        .user-avatar-preview {
+            width: 80px; height: 80px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            border-radius: 24px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 2rem; font-weight: 800;
+            box-shadow: 0 15px 25px -5px rgba(16, 185, 129, 0.3);
+            transform: rotate(-3deg);
+        }
+
+        h1 { margin: 0; font-size: 2.2rem; font-weight: 800; letter-spacing: -0.04em; }
+
+        /* --- FORM --- */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+
+        .input-group { margin-bottom: 1rem; text-align: left; }
+        .full-width { grid-column: span 2; }
+
+        label {
+            display: block; font-size: 0.75rem; font-weight: 800;
+            margin-bottom: 8px; color: var(--text-soft);
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+
+        input, select {
+            width: 100%; padding: 14px 18px; border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            background: var(--input-bg); color: var(--text-main);
+            font-family: inherit; font-size: 1rem; font-weight: 600;
+        }
+
+        input:focus, select:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+
+        .pw-strength {
+            height: 6px; width: 100%; background: var(--input-bg);
+            margin-top: 10px; border-radius: 10px; overflow: hidden;
+            display: none; border: 1px solid var(--glass-border);
+        }
+        .pw-strength-bar { height: 100%; width: 0%; transition: width 0.3s, background 0.3s; }
+
+        .badge-permanent {
+            background: rgba(225, 29, 72, 0.1); color: #e11d48;
+            padding: 14px; border-radius: 16px; font-size: 0.9rem;
+            border: 1px solid rgba(225, 29, 72, 0.2);
+            margin-top: 15px; display: flex; align-items: center; gap: 12px;
+            font-weight: 600;
+        }
+
+        .btn-save {
+            background: var(--accent); color: white; border: none;
+            padding: 18px; border-radius: 20px; font-weight: 800;
+            cursor: pointer; width: 100%; font-size: 1.1rem;
+            margin-top: 2.5rem; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-save:hover { transform: translateY(-3px); filter: brightness(1.1); }
+
+        .back-link {
+            display: inline-flex; align-items: center; gap: 8px;
+            margin-top: 2.5rem; text-decoration: none; color: var(--accent);
+            font-size: 0.95rem; font-weight: 800;
+        }
+
+        .checkbox-group {
+            display: flex; align-items: center; gap: 14px;
+            background: rgba(16, 185, 129, 0.05);
+            padding: 18px; border-radius: 18px; cursor: pointer;
+            border: 1px solid var(--glass-border);
+        }
+        .checkbox-group input { width: 22px; height: 22px; accent-color: var(--accent); cursor: pointer; }
+
+        footer { padding: 40px; text-align: center; font-size: 0.85rem; color: var(--text-soft); font-weight: 700; border-top: 1px solid var(--glass-border); }
+    </style>
+</head>
+<body>
+
+    <nav id="topbar">
+        <a href="/" class="logo"><img src="/static/logo.png" alt="EcoCode" class="logo-box"> EcoCode</a>
+        <div class="nav-links">
+            <a href="/">Početna</a> <a href="/insights/gps">GPS</a> <a href="/track">Dnevnik</a> <a href="/eco-score?range=week">Analiza</a>
+            {% if user %}<a href="/profile" class="btn-nav-profile">Profil</a>{% endif %}
+        </div>
+    </nav>
+
+    <main>
+        <div class="admin-card">
+            <div class="header-section">
+                <div class="user-avatar-preview" id="avatar-preview">
+                    {{ user.get('username','?')[0].upper() if user else 'N' }}
+                </div>
+                <div>
+                    <h1>{{ 'Uredi' if user else 'Novi' }} Korisnik</h1>
+                    <p style="color: var(--text-soft); margin: 4px 0 0 0; font-size: 0.95rem; font-weight: 600;">
+                        {{ 'Ažurirajte pristupne podatke i uloge.' if user else 'Kreirajte novi korisnički račun u sustavu.' }}
+                    </p>
+                </div>
+            </div>
+
+            {% if error %}<div style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 15px; border-radius: 16px; margin-bottom: 2rem; font-weight: 700; border: 1px solid rgba(239, 68, 68, 0.2);">⚠️ {{ error }}</div>{% endif %}
+
+            <form action="{{ action }}" method="post">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Ime i prezime</label>
+                        <input type="text" name="name" id="name-input" value="{{ user.get('name','') if user else '' }}" placeholder="Ivan Horvat">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Korisničko ime</label>
+                        <input type="text" name="username" id="username-input" value="{{ user.get('username','') if user else '' }}" required placeholder="eko_warrior">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Država</label>
+                        <select name="country" id="country-select">
+                            {% for code,label in countries %}
+                                <option value="{{ code }}" {% if selected_country == code %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Broj mobitela</label>
+                        <input type="text" id="phone-input" name="phone" value="{{ user.get('phone','') if user else '' }}">
+                        <small style="color:var(--text-soft); display:block; margin-top:8px; font-weight: 600;">Primjer: <span id="phone-hint" style="color: var(--accent);">{{ phone_example.display }}</span></small>
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label>E-mail adresa</label>
+                        <input type="email" name="email" value="{{ user.get('email','') if user else '' }}" placeholder="ivan@ecocode.hr">
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label>Uloga korisnika</label>
+                        {% if current_is_admin %}
+                            <select name="user_type" id="role-select" {% if user and (user.get('permanent') == 1 or user.get('username') == 'admin') %}disabled style="opacity: 0.6; cursor:not-allowed"{% endif %}>
+                                <option value="user" {% if (user and user.get('user_type','user')) == 'user' %}selected{% endif %}>👤 Standardni Korisnik</option>
+                                <option value="admin" {% if (user and user.get('user_type','user')) == 'admin' %}selected{% endif %}>🛡️ Administrator</option>
+                            </select>
+                            
+                            {% if user and (user.get('permanent') == 1 or user.get('username') == 'admin') %}
+                                <div class="badge-permanent">
+                                    <span>🔒</span> <strong>Zaključana uloga:</strong> Sistemski račun.
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <input type="hidden" name="user_type" value="{{ user.get('user_type','user') if user else 'user' }}">
+                            <div style="padding: 14px 18px; background: var(--input-bg); border-radius: 16px; border: 1px solid var(--glass-border); font-weight: 700;">
+                                {% if user and user.get('user_type') == 'admin' %}🛡️ Administrator{% else %}👤 Standardni Korisnik{% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label>Lozinka</label>
+                        <input type="password" name="password" id="pw-input" placeholder="••••••••">
+                        <div class="pw-strength" id="pw-strength-container">
+                            <div class="pw-strength-bar" id="pw-bar"></div>
+                        </div>
+                        <small style="color:var(--text-soft); display:block; margin-top:10px; font-weight: 600;">
+                            {% if user %}Ostavite prazno ako ne mijenjate.{% else %}Postavite početnu lozinku.{% endif %}
+                        </small>
+                    </div>
+
+                    {% if current_is_admin %}
+                    <div class="input-group full-width">
+                        <label for="perm_check" class="checkbox-group">
+                            <input type="checkbox" name="permanent" value="1" id="perm_check" {% if user and user.get('permanent') == 1 %}checked disabled{% endif %}>
+                            <span>Postavi kao <strong>trajni račun</strong> (zaštita sustava)</span>
+                        </label>
+                        {% if user and user.get('permanent') == 1 %}<input type="hidden" name="permanent" value="1">{% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn-save">Spremi promjene</button>
+            </form>
+
+            <a href="/users" class="back-link">← Nazad na popis</a>
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2026 EcoCode • Čuvamo tvoj digitalni otisak 🌱
+    </footer>
+
+    <script>
+        const EXAMPLES = {{ examples_map | tojson }};
+        const sel = document.getElementById('country-select');
+        const phone = document.getElementById('phone-input');
+        const hint = document.getElementById('phone-hint');
+        const usernameInput = document.getElementById('username-input');
+        const avatarPreview = document.getElementById('avatar-preview');
+        const pwInput = document.getElementById('pw-input');
+        const pwBar = document.getElementById('pw-bar');
+        const pwContainer = document.getElementById('pw-strength-container');
+        const savedTheme = localStorage.getItem('theme') || 'light';
+
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+        function updatePhoneExample() {
+            const ex = EXAMPLES[sel.value] || '';
+            phone.placeholder = ex;
+            hint.textContent = ex;
+        }
+        sel.addEventListener('change', updatePhoneExample);
+        updatePhoneExample();
+
+        usernameInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+            avatarPreview.textContent = val ? val[0].toUpperCase() : '?';
+        });
+
+        pwInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+            if (val.length === 0) { pwContainer.style.display = 'none'; return; }
+            pwContainer.style.display = 'block';
+            let score = 0;
+            if (val.length > 6) score += 33;
+            if (/[A-Z]/.test(val)) score += 33;
+            if (/[0-9]/.test(val) || /[^A-Za-z0-9]/.test(val)) score += 34;
+            pwBar.style.width = score + '%';
+            if (score < 40) pwBar.style.background = '#ef4444';
+            else if (score < 80) pwBar.style.background = '#f59e0b';
+            else pwBar.style.background = '#10b981';
+        });
+    </script>
+</body>
+</html>

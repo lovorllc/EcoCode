@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="hr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registracija - EcoCode</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* SVJETLA ECO TEMA */
+            --bg: #f8fafc;
+            --accent: #10b981;
+            --accent-dark: #059669;
+            --text-main: #0f172a;
+            --text-soft: #64748b;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(16, 185, 129, 0.2);
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+            --input-bg: #f8fafc;
+        }
+
+        [data-theme="dark"] {
+            /* TAMNA ECO GLASS TEMA */
+            --bg: #0f172a;
+            --accent: #34d399;
+            --accent-dark: #10b981;
+            --text-main: #f8fafc;
+            --text-soft: #94a3b8;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --glass-border: rgba(52, 211, 153, 0.15);
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            --input-bg: rgba(0, 0, 0, 0.2);
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 40%),
+                radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.08) 0px, transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- USKLAĐEN TOPBAR --- */
+        #topbar {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            font-weight: 800; font-size: 1.5rem; color: var(--text-main);
+            text-decoration: none; display: flex; align-items: center; gap: 12px;
+        }
+        .logo-box {
+            width: 40px; height: 40px; 
+            border-radius: 12px; object-fit: contain;
+        }
+
+        .nav-links { display: flex; gap: 10px; align-items: center; }
+        .nav-links a { 
+            text-decoration: none; color: var(--text-main); font-weight: 600; 
+            font-size: 0.9rem; padding: 8px 16px; border-radius: 12px;
+        }
+        .nav-links a:hover { background: rgba(16, 185, 129, 0.1); color: var(--accent); }
+
+        /* --- SIGNUP CONTENT --- */
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px 80px;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .signup-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            width: 100%;
+            max-width: 700px;
+            padding: 3.5rem;
+            border-radius: 32px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            position: relative;
+        }
+        .signup-card::before {
+            content: ""; position: absolute; top: 0; left: 40px; right: 40px; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        h1 { margin: 0 0 0.5rem 0; font-size: 2.5rem; font-weight: 800; text-align: center; letter-spacing: -0.04em; }
+        .subtitle { text-align: center; color: var(--text-soft); margin-bottom: 3rem; font-weight: 600; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .input-group { margin-bottom: 1rem; text-align: left; }
+        .full-width { grid-column: span 2; }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--text-soft);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            font-family: inherit;
+            font-size: 1rem;
+            background: var(--input-bg);
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+
+        /* Password Logic */
+        .password-container { position: relative; }
+        #toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(16, 185, 129, 0.1);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 10px;
+            color: var(--accent-dark);
+            font-weight: 800;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .strength-meter {
+            height: 6px;
+            width: 100%;
+            background: var(--input-bg);
+            margin-top: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        .strength-bar { height: 100%; width: 0%; transition: width 0.3s, background 0.3s; }
+
+        .eula-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(16, 185, 129, 0.05);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+        }
+        .eula-group input[type="checkbox"] {
+            width: 22px; height: 22px; cursor: pointer; accent-color: var(--accent);
+        }
+        .eula-group label { text-transform: none; margin-bottom: 0; font-size: 0.95rem; color: var(--text-main); cursor: pointer; }
+        .eula-group a { color: var(--accent); text-decoration: none; font-weight: 800; }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 18px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 2.5rem;
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+        }
+
+        button[type="submit"]:hover {
+            transform: translateY(-3px);
+            filter: brightness(1.1);
+        }
+
+        .footer-links { text-align: center; margin-top: 2rem; font-size: 0.95rem; font-weight: 600; color: var(--text-soft); }
+        .footer-links a { color: var(--accent); text-decoration: none; font-weight: 800; }
+
+        footer { padding: 40px; text-align: center; font-size: 0.85rem; color: var(--text-soft); font-weight: 700; border-top: 1px solid var(--glass-border); }
+
+        @media (max-width: 650px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .signup-card { padding: 2rem 1.5rem; border-radius: 20px; margin: 10px; }
+            h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav id="topbar">
+        <a href="/" class="logo">
+            <img src="/static/logo.png" alt="EcoCode" class="logo-box">
+            EcoCode
+        </a>
+        <div class="nav-links">
+            <a href="/">Početna</a>
+            <a href="/insights/gps">GPS</a>
+            <a href="/track">Dnevnik</a>
+            <a href="/login" style="font-weight: 800; color: var(--accent);">Prijava</a>
+        </div>
+    </nav>
+
+    <main>
+      <div class="signup-card">
+        <h1>Postani Eco Heroj 🌿</h1>
+        <p class="subtitle">Pridruži se pokretu za čišći planet.</p>
+
+        <form action="signup" method="post" id="signupForm">
+          <div class="form-grid">
+            <div class="input-group">
+              <label>Ime i prezime</label>
+              <input type="text" name="name" value="{{ name | default('') }}" placeholder="Ivan Horvat" required>
+            </div>
+
+            <div class="input-group">
+              <label>Korisničko ime</label>
+              <input type="text" name="username" value="{{ username | default('') }}" placeholder="eko_warrior" required>
+            </div>
+
+            <div class="input-group">
+              <label>Email adresa</label>
+              <input type="email" name="email" value="{{ email | default('') }}" placeholder="ivan@primjer.hr" required>
+            </div>
+
+            <div class="input-group">
+              <label>Država</label>
+              <select name="country" id="country-select">
+                {% for code, label in countries %}
+                  <option value="{{ code }}" {% if selected_country == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="input-group full-width">
+              <label>Broj telefona</label>
+              <input type="text" id="phone-input" name="phone" value="{{ phone | default('') }}">
+              <small style="font-size: 0.75rem; color: var(--text-soft); margin-top: 8px; display: block; font-weight: 600;">
+                Primjer: <span id="phone-hint" style="color: var(--accent);">{{ phone_example.display }}</span>
+              </small>
+            </div>
+
+            <div class="input-group">
+              <label>Lozinka</label>
+              <div class="password-container">
+                <input type="password" id="password" name="password" required>
+                <button type="button" id="toggle-password">Prikaži</button>
+              </div>
+              <div class="strength-meter"><div class="strength-bar" id="strength-bar"></div></div>
+            </div>
+
+            <div class="input-group">
+              <label>Potvrdi lozinku</label>
+              <input type="password" id="password-confirm" name="password_confirm" required>
+            </div>
+
+            <div class="input-group full-width">
+                <div class="eula-group">
+                    <input type="checkbox" id="eula-check" name="eula_accepted" required>
+                    <label for="eula-check">
+                        Prihvaćam <a href="/eula.html">Uvjete korištenja i privatnosti</a> za EcoCode.
+                    </label>
+                </div>
+            </div>
+          </div>
+
+          <button type="submit" id="submitBtn">Izradi račun</button>
+        </form>
+
+        <div class="footer-links">
+          Već imaš račun? <a href="/login">Prijavi se</a>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      &copy; 2026 EcoCode • Čuvamo tvoj digitalni otisak 🌱
+    </footer>
+
+    <script>
+      // 0. Sinkronizacija teme
+      document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');
+
+      // 1. Password Strength
+      const pwd = document.getElementById('password');
+      const strengthBar = document.getElementById('strength-bar');
+
+      pwd.addEventListener('input', () => {
+        let val = pwd.value;
+        let strength = 0;
+        if (val.length > 6) strength += 30;
+        if (/[A-Z]/.test(val)) strength += 30;
+        if (/[0-9]/.test(val)) strength += 40;
+
+        strengthBar.style.width = strength + "%";
+        if (strength < 40) strengthBar.style.background = "#ef4444";
+        else if (strength < 70) strengthBar.style.background = "#f59e0b";
+        else strengthBar.style.background = "#10b981";
+      });
+
+      // 2. Toggle Password
+      const toggleBtn = document.getElementById('toggle-password');
+      toggleBtn.addEventListener('click', function() {
+        const isHidden = pwd.type === 'password';
+        pwd.type = isHidden ? 'text' : 'password';
+        document.getElementById('password-confirm').type = isHidden ? 'text' : 'password';
+        this.textContent = isHidden ? 'Sakrij' : 'Prikaži';
+      });
+
+      // 3. Draft Persistence
+      (function(){
+        const form = document.getElementById('signupForm');
+        const DRAFT_KEY = 'signupDraft';
+        form.addEventListener('input', () => {
+            const data = new FormData(form);
+            const obj = {};
+            data.forEach((value, key) => obj[key] = value);
+            sessionStorage.setItem(DRAFT_KEY, JSON.stringify(obj));
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+            const raw = sessionStorage.getItem(DRAFT_KEY);
+            if(raw) {
+                const data = JSON.parse(raw);
+                Object.keys(data).forEach(key => {
+                    if(form.elements[key]) form.elements[key].value = data[key];
+                });
+            }
+        });
+      })();
+    </script>
+</body>
+</html>

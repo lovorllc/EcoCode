@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="hr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil - {{ user.username }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* SVJETLA ECO TEMA */
+            --bg: #f8fafc;
+            --accent: #10b981;
+            --accent-dark: #059669;
+            --text-main: #0f172a;
+            --text-soft: #64748b;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(16, 185, 129, 0.2);
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="dark"] {
+            /* TAMNA ECO GLASS TEMA */
+            --bg: #0f172a;
+            --accent: #34d399;
+            --accent-dark: #10b981;
+            --text-main: #f8fafc;
+            --text-soft: #94a3b8;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --glass-border: rgba(52, 211, 153, 0.15);
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+        }
+
+        * { box-sizing: border-box; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 45%),
+                radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.1) 0px, transparent 45%);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* --- UNIFICIRANI TOPBAR --- */
+        #topbar {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 5%;
+            position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            font-weight: 800; font-size: 1.5rem; color: var(--text-main);
+            text-decoration: none; display: flex; align-items: center; gap: 12px;
+        }
+        
+        /* Logo kocka iz track.html */
+        .logo-box {
+            background: var(--accent); color: white; width: 40px; height: 40px; 
+            display: flex; align-items: center; justify-content: center; 
+            border-radius: 12px; font-weight: 900;
+        }
+
+        .nav-links { display: flex; gap: 10px; align-items: center; }
+        .nav-links a { 
+            text-decoration: none; color: var(--text-main); font-weight: 600; 
+            font-size: 0.9rem; padding: 8px 16px; border-radius: 12px;
+        }
+        .nav-links a:hover { background: rgba(16, 185, 129, 0.1); color: var(--accent); }
+
+        /* Gumbi iz track.html */
+        .btn-primary { 
+            background: var(--accent); color: white !important; 
+            padding: 10px 24px; border-radius: 14px; 
+            font-weight: 700 !important; text-decoration: none; 
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2); 
+        }
+
+        .btn-admin { 
+            background: #3b82f6; color: white !important; 
+            padding: 10px 24px; border-radius: 14px; 
+            font-weight: 700 !important; text-decoration: none; 
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2); 
+        }
+
+        /* --- ODJAVA OVERLAY --- */
+        #logout-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px);
+            z-index: 9999; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; opacity: 0; pointer-events: none;
+        }
+        #logout-overlay.active { opacity: 1; pointer-events: all; }
+        
+        .logout-spinner {
+            width: 50px; height: 50px; border: 4px solid rgba(16, 185, 129, 0.1);
+            border-top: 4px solid var(--accent); border-radius: 50%;
+            animation: spin 1s infinite linear;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* --- LAYOUT --- */
+        main {
+            max-width: 1000px; margin: 40px auto 100px; padding: 0 25px; width: 100%;
+        }
+
+        .profile-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 30px; }
+        @media (max-width: 850px) { .profile-grid { grid-template-columns: 1fr; } }
+
+        .glass-card {
+            background: var(--card-bg); backdrop-filter: blur(16px);
+            border-radius: 40px; padding: 3rem 2.5rem;
+            box-shadow: var(--shadow); border: 1px solid var(--glass-border);
+            position: relative;
+        }
+        .glass-card::before {
+            content: ""; position: absolute; top: 0; left: 40px; right: 40px; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        .avatar-circle {
+            width: 120px; height: 120px; margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, var(--accent) 0%, #34d399 100%);
+            color: white; border-radius: 40px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 3.5rem; font-weight: 800;
+            box-shadow: 0 20px 40px -10px rgba(16, 185, 129, 0.4);
+            transform: rotate(-3deg);
+        }
+
+        h1 { font-size: 2.2rem; margin: 0; font-weight: 900; letter-spacing: -0.05em; text-align: center; }
+        .username-tag { color: var(--accent); font-weight: 700; text-align: center; margin-top: 5px; opacity: 0.8; }
+
+        .info-item {
+            background: rgba(0,0,0,0.02); padding: 18px 22px; border-radius: 24px;
+            margin-bottom: 16px; display: flex; align-items: center; gap: 15px;
+            border: 1px solid var(--glass-border);
+        }
+        .info-icon { font-size: 1.4rem; background: var(--bg); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 14px; }
+        .info-label { color: var(--text-soft); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+        .info-value { font-weight: 700; font-size: 1rem; }
+
+        /* --- BUTTONS --- */
+        .btn-group { margin-top: 2rem; display: flex; flex-direction: column; gap: 12px; }
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 16px; border-radius: 18px; text-decoration: none; font-weight: 800;
+            cursor: pointer; border: none; font-size: 0.95rem;
+        }
+        .btn-accent { background: var(--accent); color: white; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2); }
+        .btn-accent:hover { transform: translateY(-3px); filter: brightness(1.1); }
+        
+        .btn-outline { background: var(--bg); color: var(--text-main); border: 1px solid var(--glass-border); }
+        .btn-outline:hover { background: var(--glass-border); }
+
+        .btn-logout { background: #fee2e2; color: #ef4444; }
+        .btn-logout:hover { background: #fecaca; transform: translateY(-3px); }
+    </style>
+</head>
+<body>
+
+    <div id="logout-overlay">
+        <div class="logout-spinner"></div>
+        <p style="color: white; margin-top: 20px; font-weight: 700;">Odjavljivanje...</p>
+    </div>
+
+    <nav id="topbar">
+        <a href="/" class="logo">
+            <div class="logo-box">EC</div> 
+            EcoCode
+        </a>
+        <div class="nav-links">
+            <a href="/">Početna</a> 
+            <a href="/insights/gps">GPS</a> 
+            <a href="/track">Dnevnik</a> 
+            <a href="/eco-score?range=week">Analiza</a>
+            
+            {% if show_devtools %}
+                <a href="/devtools" class="btn-admin">Admin Alati</a>
+            {% endif %}
+
+            {% if user %}
+                <a href="/profile" class="btn-primary">Profil</a>
+            {% else %}
+                <a href="/login">Prijava</a>
+                <a href="/signup" class="btn-primary">Registracija</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main>
+        <div class="profile-grid">
+            <div class="glass-card">
+                <div class="avatar-circle">
+                    {{ user.username[0] | upper if user.username else 'U' }}
+                </div>
+                
+                <h1>{{ user.name if user.name else user.username }}</h1>
+                <div class="username-tag">@{{ user.username }}</div>
+
+                <div class="btn-group">
+                    <a href="/" class="btn btn-accent">Nadzorna ploča</a>
+                    <a href="/settings" class="btn btn-outline">⚙️ Postavke</a>
+                    <button onclick="animateLogout()" class="btn btn-logout">Odjavi se</button>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <h3 style="margin: 0 0 1.5rem 0; font-weight: 800;">Podaci računa</h3>
+                
+                <div class="info-item">
+                    <div class="info-icon">📧</div>
+                    <div class="info-content">
+                        <span class="info-label">E-mail</span>
+                        <div class="info-value">{{ user.email if user.email else 'Nije uneseno' }}</div>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon">📱</div>
+                    <div class="info-content">
+                        <span class="info-label">Telefon</span>
+                        <div class="info-value">{{ user.phone if user.phone else 'Nije povezano' }}</div>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon">📅</div>
+                    <div class="info-content">
+                        <span class="info-label">Član od</span>
+                        <div class="info-value">{{ user.created_at[:10] if user.created_at else '2026-01-28' }}</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; padding: 20px; background: rgba(16, 185, 129, 0.05); border-radius: 20px; border: 1px dashed var(--accent); text-align: center;">
+                    <p style="margin: 0; font-size: 0.9rem; color: var(--accent-dark); font-weight: 700;">
+                        Tvoj trud čini razliku za planetu! 🌱
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+        function animateLogout() {
+            document.getElementById('logout-overlay').classList.add('active');
+            setTimeout(() => { window.location.href = "/logout"; }, 1000);
+        }
+    </script>
+</body>
+</html>

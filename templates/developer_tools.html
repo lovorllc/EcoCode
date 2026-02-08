@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="hr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - EcoCode</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* SVJETLA TEMA */
+            --bg: #f8fafc;
+            --accent-blue: #3b82f6;
+            --accent-glow: #1d4ed8;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --text-main: #0f172a;
+            --text-soft: #64748b;
+            --glass-border: rgba(15, 23, 42, 0.1);
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+            --neon-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+        }
+
+        [data-theme="dark"] {
+            /* TAMNA TEMA */
+            --bg: #030712;
+            --accent-blue: #3b82f6;
+            --accent-glow: #1d4ed8;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --text-main: #f8fafc;
+            --text-soft: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+            --neon-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(29, 78, 216, 0.08) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* --- TOPBAR --- */
+        #topbar {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            font-weight: 800; font-size: 1.4rem; color: var(--text-main);
+            text-decoration: none; display: flex; align-items: center; gap: 12px;
+        }
+        .logo span { color: var(--accent-blue); }
+
+        .dev-badge {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            padding: 6px 16px;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 800;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* --- MAIN LAYOUT --- */
+        main { max-width: 1100px; margin: 0 auto; width: 100%; padding: 60px 5%; }
+
+        .hero-text { margin-bottom: 40px; animation: fadeInUp 0.8s ease; }
+        .hero-text small { color: var(--accent-blue); font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em; }
+        .hero-text h1 { font-size: 3rem; font-weight: 800; margin: 5px 0 0; letter-spacing: -0.04em; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border-radius: 32px;
+            padding: 40px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .glass-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 30px; right: 30px; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+        }
+
+        /* --- TOOL GRID --- */
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .tool-link {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 25px;
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            text-decoration: none;
+            color: var(--text-main);
+            position: relative;
+        }
+
+        [data-theme="dark"] .tool-link { background: rgba(255, 255, 255, 0.03); }
+
+        .tool-link:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-5px);
+            background: var(--bg);
+            box-shadow: var(--neon-shadow);
+        }
+
+        .tool-icon {
+            font-size: 1.8rem;
+            background: var(--card-bg);
+            width: 55px; height: 55px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .tool-info strong { display: block; font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; }
+        .tool-info span { font-size: 0.85rem; color: var(--text-soft); line-height: 1.4; font-weight: 500; }
+
+        /* --- STATUS BOX --- */
+        .url-box {
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 25px;
+            border-radius: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            margin-top: 40px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .url-box code { color: var(--accent-blue); }
+
+        /* Error state */
+        .error-container { text-align: center; padding: 40px; }
+        .btn-home { 
+            display: inline-block; margin-top: 20px; padding: 12px 24px; 
+            background: var(--accent-blue); color: white; text-decoration: none;
+            border-radius: 12px; font-weight: 700;
+        }
+
+        footer { text-align: center; padding: 40px; color: var(--text-soft); font-size: 0.85rem; font-weight: 600; }
+
+        .logo-box {
+            width: 40px; height: 40px; 
+            border-radius: 12px; object-fit: contain;
+        }
+
+    </style>
+</head>
+<body>
+
+    <nav id="topbar">
+        <a href="/" class="logo">
+            <img src="/static/logo.png" alt="EcoCode" class="logo-box">
+            EcoCode <span>Admin.</span>
+        </a>
+        <div>
+            {% if get_current_user(request) %}
+                <span class="dev-badge">ADMIN: {{ get_current_user(request) }}</span>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main>
+        <div class="glass-card">
+            {% if error %}
+                <div class="error-container">
+                    <div style="font-size: 3.5rem; margin-bottom: 20px;">🔒</div>
+                    <h2 style="margin: 0 0 10px;">Pristup odbijen</h2>
+                    <p style="color: var(--text-soft);">{{ error }}</p>
+                    <a href="/" class="btn-home">Povratak na početnu</a>
+                </div>
+            {% else %}
+                <div class="hero-text">
+                    <small>Kontrolni Centar</small>
+                    <h1>Admin Dashboard</h1>
+                </div>
+
+                <div class="tool-grid">
+                    <a href="/" class="tool-link">
+                        <div class="tool-icon">🏠</div>
+                        <div class="tool-info">
+                            <strong>Glavna ploča</strong>
+                            <span>Povratak na korisničko sučelje</span>
+                        </div>
+                    </a>
+                    
+                    <a href="/users" class="tool-link" style="border-left: 5px solid var(--accent-blue);">
+                        <div class="tool-icon">👥</div>
+                        <div class="tool-info">
+                            <strong>Korisnici</strong>
+                            <span>Dozvole i upravljanje profilima</span>
+                        </div>
+                    </a>
+
+                    <a href="/admin/gps" class="tool-link" style="border-left: 5px solid #10b981;">
+                        <div class="tool-icon">📍</div>
+                        <div class="tool-info">
+                            <strong>GPS Rute</strong>
+                            <span>Nadzor i pregled kretanja</span>
+                        </div>
+                    </a>
+
+                    <a href="/admin/emission_factors" class="tool-link" style="border-left: 5px solid #f59e0b;">
+                        <div class="tool-icon">⚖️</div>
+                        <div class="tool-info">
+                            <strong>CO₂ Faktori</strong>
+                            <span>Uređivanje parametara emisije</span>
+                        </div>
+                    </a>
+
+                    <a href="/admin/activities" class="tool-link" style="border-left: 5px solid #6366f1;">
+                        <div class="tool-icon">📋</div>
+                        <div class="tool-info">
+                            <strong>Dnevnik rada</strong>
+                            <span>Pregled svih aktivnosti sustava</span>
+                        </div>
+                    </a>
+
+                    <a href="/debug/dbinfo" class="tool-link">
+                        <div class="tool-icon">💾</div>
+                        <div class="tool-info">
+                            <strong>Baza podataka</strong>
+                            <span>Status tablica i dijagnostika</span>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="url-box">
+                    <span style="color: #10b981;">// System Status:</span> <br>
+                    host: <code>{{ request.url.hostname }}</code> <br>
+                    security: <code>ENCRYPTED_SESSION</code>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2026 <strong>EcoCode</strong> • Admin Interface • Sigurna veza aktivna
+    </footer>
+
+    <script>
+        // Sinhronizacija teme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="hr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoCode Admin - Upravljanje GPS rutama</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* SVJETLA TEMA */
+            --bg: #f8fafc;
+            --accent-blue: #3b82f6;
+            --accent-glow: #1d4ed8;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --text-main: #0f172a;
+            --text-soft: #64748b;
+            --glass-border: rgba(15, 23, 42, 0.1);
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+            --neon-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+        }
+
+        [data-theme="dark"] {
+            /* TAMNA TEMA */
+            --bg: #030712;
+            --accent-blue: #3b82f6;
+            --accent-glow: #1d4ed8;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-soft: #94a3b8;
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+            --neon-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(29, 78, 216, 0.08) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- TOPBAR --- */
+        #topbar {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            font-weight: 800; font-size: 1.4rem; color: var(--text-main);
+            text-decoration: none; display: flex; align-items: center; gap: 12px;
+        }
+        .logo span { color: var(--accent-blue); }
+
+        .nav-links { display: flex; gap: 20px; align-items: center; }
+        .nav-links a { text-decoration: none; color: var(--text-soft); font-weight: 600; font-size: 0.9rem; }
+        .nav-links a:hover { color: var(--accent-blue); }
+
+        .btn-nav-admin {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-glow));
+            color: white !important;
+            padding: 10px 24px;
+            border-radius: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: var(--neon-shadow);
+        }
+
+        /* --- MAIN CONTENT --- */
+        main { max-width: 900px; margin: 0 auto; width: 100%; padding: 40px 5%; }
+
+        .hero-text { margin-bottom: 40px; animation: fadeInUp 0.8s ease; }
+        .hero-text small { color: var(--accent-blue); font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em; }
+        .hero-text h1 { font-size: 3rem; font-weight: 800; margin: 5px 0 0; letter-spacing: -0.04em; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- KARTICA / PANEL --- */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border-radius: 32px;
+            padding: 30px;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            box-shadow: var(--shadow);
+        }
+
+        .glass-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 30px; right: 30px; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+        }
+
+        h2 { font-size: 1.5rem; font-weight: 800; margin-top: 0; margin-bottom: 25px; color: var(--text-main); }
+
+        /* --- USER ITEM --- */
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 15px;
+            border-bottom: 1px solid var(--glass-border);
+            border-radius: 16px;
+        }
+        .user-item:last-child { border-bottom: none; }
+        .user-item:hover { background: rgba(59, 130, 246, 0.05); }
+
+        .user-info .username { font-weight: 800; font-size: 1.1rem; color: var(--text-main); }
+        .user-info .details { color: var(--text-soft); font-size: 0.85rem; margin-top: 4px; }
+
+        /* --- BUTTONS --- */
+        .btn-manage {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-glow));
+            color: white !important;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.85rem;
+            box-shadow: var(--neon-shadow);
+            display: inline-block;
+        }
+        .btn-manage:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 25px;
+            text-decoration: none;
+            color: var(--text-soft);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .back-link:hover { color: var(--accent-blue); }
+
+        .logo-box {
+            width: 40px; height: 40px; 
+            border-radius: 12px; object-fit: contain;
+        }
+
+    </style>
+</head>
+<body>
+
+    <nav id="topbar">
+        <a href="/" class="logo">
+            <img src="/static/logo.png" alt="EcoCode" class="logo-box">
+            EcoCode <span>Admin.</span>
+        </a>
+        <div>
+            {% if get_current_user(request) %}
+                <span class="dev-badge">ADMIN: {{ get_current_user(request) }}</span>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main>
+        <div class="hero-text">
+            <small>Upravljanje Sustavom</small>
+            <h1>GPS Korisnici</h1>
+        </div>
+
+        <section class="glass-card">
+            <h2>Popis Korisnika</h2>
+            
+            {% if users|length == 0 %}
+                <div style="color: var(--text-soft); padding: 20px; text-align: center;">Nema pronađenih korisnika u sustavu.</div>
+            {% else %}
+                <div class="user-list">
+                    {% for u in users %}
+                        <div class="user-item">
+                            <div class="user-info">
+                                <div class="username">{{ u.get('username') }}</div>
+                                <div class="details">ID: #{{ u.get('id') }} • {{ u.get('email','') }}</div>
+                            </div>
+                            <div class="user-actions">
+                                <a href="/admin/users/{{ u.get('id') }}/tracks" class="btn-manage">Upravljaj rutama</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </section>
+
+        <a href="/devtools" class="back-link">← Natrag na alate</a>
+    </main>
+
+    <script>
+        // SINHRONIZACIJA TEME
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+</body>
+</html>

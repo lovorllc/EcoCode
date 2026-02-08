@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+Jinja2
+itsdangerous
+passlib[bcrypt]
+phonenumbers
+PyJWT
+python-jose
+python-multipart
+httpx

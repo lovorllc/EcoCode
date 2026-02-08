@@ -1,0 +1,28 @@
+# Auto Git Sync Script
+# Save as auto-sync.ps1 and run inside your repo
+
+$interval = 20   # seconds between syncs
+
+Write-Host "Starting auto-sync loop..."
+while ($true) {
+
+    # Pull latest changes
+    git pull --rebase
+
+    # Check for local changes
+    $status = git status --porcelain
+
+    if ($status) {
+        # Stage and commit only if something changed
+        git add .
+        $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        git commit -m "auto-sync $timestamp"
+        git push
+        Write-Host "[$timestamp] Synced changes."
+    }
+    else {
+        Write-Host "No changes. Waiting..."
+    }
+
+    Start-Sleep -Seconds $interval
+}

@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="hr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoCode - Dnevnik aktivnosti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* SVJETLA ECO TEMA */
+            --bg: #f8fafc;
+            --accent: #10b981;
+            --accent-dark: #059669;
+            --text-main: #0f172a;
+            --text-soft: #64748b;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(16, 185, 129, 0.15);
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] {
+            /* TAMNA ECO GLASS TEMA */
+            --bg: #0f172a;
+            --accent: #34d399;
+            --accent-dark: #10b981;
+            --text-main: #f8fafc;
+            --text-soft: #94a3b8;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --glass-border: rgba(52, 211, 153, 0.1);
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 40%), 
+                radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.05) 0px, transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* --- TOPBAR --- */
+        #topbar {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            font-weight: 800; font-size: 1.5rem; color: var(--text-main);
+            text-decoration: none; display: flex; align-items: center; gap: 12px;
+        }
+        .logo-box {
+            width: 40px; height: 40px; 
+            border-radius: 12px; object-fit: contain;
+        }
+
+        .nav-links { display: flex; gap: 10px; align-items: center; }
+        .nav-links a { 
+            text-decoration: none; color: var(--text-main); font-weight: 600; 
+            font-size: 0.9rem; padding: 8px 16px; border-radius: 12px;
+        }
+        .nav-links a:hover { background: rgba(16, 185, 129, 0.1); color: var(--accent); }
+        .btn-primary { background: var(--accent); color: white !important; padding: 10px 24px; border-radius: 14px; font-weight: 700 !important; text-decoration: none; }
+        .btn-admin { background: #3b82f6; color: white !important; padding: 10px 24px; border-radius: 14px; font-weight: 700 !important; text-decoration: none; }
+
+        .btn-profile {
+            background: var(--accent); color: white !important;
+            padding: 10px 24px; border-radius: 14px; font-weight: 700;
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
+        }
+
+        /* --- LAYOUT --- */
+        main {
+            max-width: 1200px;
+            margin: 2rem auto 100px;
+            padding: 0 5%;
+        }
+
+        .hero-section { margin-bottom: 2.5rem; }
+        .hero-section h1 { font-size: 2.5rem; font-weight: 800; margin: 0; letter-spacing: -0.04em; }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border-radius: 32px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            position: relative;
+        }
+        .glass-card::before {
+            content: ""; position: absolute; top: 0; left: 30px; right: 30px; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        /* --- FORM --- */
+        .track-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            align-items: flex-end;
+        }
+
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        label { font-size: 0.75rem; font-weight: 800; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.05em; }
+
+        input, select {
+            padding: 14px;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            background: var(--bg);
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+
+        .btn-add {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
+        }
+        .btn-add:hover { transform: translateY(-3px); filter: brightness(1.1); }
+
+        /* --- DASHBOARD GRID --- */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 30px;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 950px) { .grid-layout { grid-template-columns: 1fr; } }
+
+        .activity-item {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--glass-border);
+            border-left: 6px solid var(--accent);
+        }
+
+        .activity-info h4 { margin: 0; font-size: 1.1rem; font-weight: 800; }
+        .activity-info small { color: var(--text-soft); font-weight: 600; display: block; margin-top: 4px; }
+
+        .activity-meta { text-align: right; }
+        .co2-val { font-size: 1.2rem; font-weight: 900; color: var(--accent); display: block; }
+        
+        .btn-delete {
+            color: #ef4444; background: rgba(239, 68, 68, 0.1);
+            border: none; padding: 6px 12px; border-radius: 10px;
+            font-size: 0.75rem; font-weight: 800; cursor: pointer; margin-top: 8px;
+        }
+
+        .totals-card {
+            background: linear-gradient(135deg, var(--accent-dark) 0%, #064e3b 100%);
+            color: white;
+            text-align: center;
+        }
+        .totals-card h4 { margin: 0; opacity: 0.8; font-size: 0.9rem; text-transform: uppercase; }
+        .total-value { font-size: 2.2rem; font-weight: 900; margin: 10px 0; }
+
+        /* --- ADMIN SECTION --- */
+        .admin-section {
+            margin-top: 4rem;
+            padding: 30px;
+            border-radius: 32px;
+            background: rgba(16, 185, 129, 0.03);
+            border: 2px dashed var(--glass-border);
+        }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; padding: 15px; color: var(--text-soft); font-size: 0.75rem; text-transform: uppercase; }
+        td { padding: 15px; border-top: 1px solid var(--glass-border); font-weight: 600; }
+
+        footer { text-align: center; padding: 40px; color: var(--text-soft); font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <nav id="topbar">
+        <a href="/" class="logo"><img src="/static/logo.png" alt="EcoCode" class="logo-box"> EcoCode</a>
+        <div class="nav-links">
+            <a href="/">Početna</a> <a href="/insights/gps">GPS</a> <a href="/track">Dnevnik</a> <a href="/eco-score?range=week">Analiza</a>
+            {% if show_devtools %}<a href="/devtools" class="btn-admin">Admin Alati</a>{% endif %}
+            {% if user %}<a href="/profile" class="btn-primary">Profil</a>{% endif %}
+        </div>
+    </nav>
+
+    <main>
+        <div class="hero-section">
+            <h1>Prati aktivnosti 🌱</h1>
+            <p style="color: var(--text-soft); font-weight: 500;">Zabilježi svoje dnevne navike i smanji otisak.</p>
+        </div>
+
+        <section class="glass-card">
+            <label style="display: block; margin-bottom: 20px;">Nova bilješka</label>
+            <form id="trackForm" onsubmit="event.preventDefault(); submitActivity();" class="track-form">
+                <div class="input-group">
+                    <label>Kategorija</label>
+                    <select id="category" required>
+                        <option value="Transport">Transport</option>
+                        <option value="Electricity">Struja</option>
+                        <option value="Water">Voda</option>
+                        <option value="Food">Hrana</option>
+                        <option value="Shopping">Kupovina</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Podtip</label>
+                    <select id="subtype"></select>
+                </div>
+
+                <div class="input-group">
+                    <label>Količina (<span id="unitLabel">km</span>)</label>
+                    <input id="quantity" type="number" step="0.01" placeholder="0.00">
+                </div>
+
+                <div class="input-group">
+                    <label>CO₂ (kg)</label>
+                    <input id="co2" type="number" step="0.01" placeholder="Izračun..." readonly style="opacity: 0.7;">
+                </div>
+
+                <div class="input-group">
+                    <button type="submit" class="btn-add">Dodaj</button>
+                </div>
+            </form>
+        </section>
+
+        <div class="grid-layout">
+            <div id="activities-container">
+                <h3 style="font-weight: 800; margin-bottom: 1.5rem;">Povijest zapisa</h3>
+                <div id="activities">Učitavanje...</div>
+            </div>
+
+            <aside>
+                <div class="glass-card totals-card">
+                    <h4>Ukupni utjecaj</h4>
+                    <div id="totals" class="total-value">0.00 kg</div>
+                    <p style="margin: 0; font-size: 0.8rem; font-weight: 600;">CO₂ prikupljeno</p>
+                </div>
+
+                
+
+                <div class="glass-card" style="margin-top: 20px; padding: 20px;">
+                    <h5 style="margin: 0 0 10px 0;">Savjet</h5>
+                    <p style="font-size: 0.85rem; color: var(--text-soft); margin: 0;">Smanjenjem tuširanja za samo 2 minute štediš do 40 litara vode dnevno!</p>
+                </div>
+            </aside>
+        </div>
+
+        {% if current_is_admin %}
+        <section class="admin-section">
+            <h4 style="margin: 0; font-weight: 800;">🛠 Admin: Emisijski faktori</h4>
+            <div id="admin-factors" style="overflow-x: auto;">Učitavanje...</div>
+            
+            <div class="glass-card" style="margin-top: 20px; border-style: solid;">
+                <h5 style="margin-top: 0;">Dodaj faktor</h5>
+                <form id="addFactorForm" onsubmit="event.preventDefault(); addFactor();" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px;">
+                    <input id="af_category" placeholder="Kat." required>
+                    <input id="af_subtype" placeholder="Sub.">
+                    <input id="af_unit" placeholder="Jed.">
+                    <input id="af_co2" placeholder="kg/jed" type="number" step="0.0001" required>
+                    <button type="submit" class="btn-add" style="padding: 10px;">Spremi</button>
+                </form>
+            </div>
+        </section>
+        {% endif %}
+    </main>
+
+    <footer>EcoCode &copy; 2026 • Čuvamo tvoj ekološki otisak 🌱</footer>
+
+    <script>
+        const CURRENT_USER_ID = {{ user.id }};
+        const initialActivities = {{ activities | tojson | default('[]') }};
+
+        // UI Logic za dinamiku forme
+        function populateSubtypes() {
+            const cat = document.getElementById('category').value;
+            const subtype = document.getElementById('subtype');
+            subtype.innerHTML = '';
+            const data = {
+                'Transport': ['car','bus','bike','walking'],
+                'Food': ['beef','pork','chicken','fish','vegetarian','vegan'],
+                'Shopping': ['electronics','clothes','other'],
+                'Electricity': ['monthly_usage','one_time'],
+                'Water': ['usage_liters','other']
+            };
+            (data[cat] || []).forEach(v => subtype.appendChild(new Option(v,v)));
+            updateFactor();
+        }
+
+        async function updateFactor() {
+            const cat = document.getElementById('category').value;
+            const sub = document.getElementById('subtype').value;
+            const unitLabel = document.getElementById('unitLabel');
+            
+            const units = {'Transport': 'km', 'Electricity': 'kWh', 'Water': 'L', 'Food': 'kg', 'Shopping': 'kom'};
+            unitLabel.textContent = units[cat] || 'jed.';
+
+            try {
+                let r = await fetch(`/api/emission_factors?category=${encodeURIComponent(cat)}&subtype=${encodeURIComponent(sub)}`);
+                let j = await r.json();
+                let f = (j.factors && j.factors[0]) || null;
+                window.currentFactor = f ? Number(f.co2_kg_per_unit) : 0.2; // fallback
+                calculateCO2();
+            } catch (e) { console.error(e); }
+        }
+
+        function calculateCO2() {
+            const q = parseFloat(document.getElementById('quantity').value);
+            if (!isNaN(q) && window.currentFactor) {
+                document.getElementById('co2').value = (q * window.currentFactor).toFixed(3);
+            }
+        }
+
+        // Render Funkcija
+        function renderActivities(list) {
+            const el = document.getElementById('activities');
+            if (!list.length) {
+                el.innerHTML = '<div class="glass-card" style="text-align:center; color:var(--text-soft)">Još nema zapisa.</div>';
+                return;
+            }
+            
+            el.innerHTML = list.map(a => `
+                <div class="activity-item">
+                    <div class="activity-info">
+                        <h4>${a.category} <span style="font-weight:400; color:var(--text-soft); font-size: 0.9rem;">• ${a.subtype}</span></h4>
+                        <small>${new Date(a.created_at).toLocaleDateString('hr-HR')} ${a.note ? '— ' + a.note : ''}</small>
+                    </div>
+                    <div class="activity-meta">
+                        <span class="co2-val">${Number(a.co2_kg).toFixed(2)} kg</span>
+                        <small>${a.quantity} ${a.unit}</small>
+                        ${a.user_id === CURRENT_USER_ID ? `<button class="btn-delete" onclick="deleteActivity(${a.id})">Obriši</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+            
+            const total = list.reduce((s, it) => s + (Number(it.co2_kg) || 0), 0);
+            document.getElementById('totals').textContent = total.toFixed(2) + ' kg';
+        }
+
+        async function fetchActivities() {
+            const r = await fetch('/api/activities');
+            const j = await r.json();
+            renderActivities(j.activities || []);
+        }
+
+        async function submitActivity() {
+            const form = new URLSearchParams();
+            form.append('category', document.getElementById('category').value);
+            form.append('subtype', document.getElementById('subtype').value);
+            form.append('co2_kg', document.getElementById('co2').value);
+            form.append('quantity', document.getElementById('quantity').value);
+            form.append('unit', document.getElementById('unitLabel').textContent);
+            
+            await fetch('/api/activities', {method:'POST', body: form});
+            fetchActivities();
+            ['quantity','co2'].forEach(id => document.getElementById(id).value = '');
+        }
+
+        async function deleteActivity(id) {
+            if (confirm('Obrisati zapis?')) {
+                await fetch(`/api/activities/${id}/delete`, {method:'POST'});
+                fetchActivities();
+            }
+        }
+
+        // Admin Logika
+        async function renderAdminFactors() {
+            const r = await fetch('/api/emission_factors');
+            const j = await r.json();
+            const list = j.factors || [];
+            let html = '<table><tr><th>Kategorija</th><th>kg/jed</th></tr>';
+            list.forEach(f => {
+                html += `<tr><td>${f.category} (${f.subtype})</td><td>${f.co2_kg_per_unit}</td></tr>`;
+            });
+            document.getElementById('admin-factors').innerHTML = html + '</table>';
+        }
+
+        // Inicijalizacija
+        document.getElementById('category').addEventListener('change', populateSubtypes);
+        document.getElementById('subtype').addEventListener('change', updateFactor);
+        document.getElementById('quantity').addEventListener('input', calculateCO2);
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+        populateSubtypes();
+        renderActivities(initialActivities);
+        if ({{ 'true' if current_is_admin else 'false' }}) renderAdminFactors();
+    </script>
+</body>
+</html>
