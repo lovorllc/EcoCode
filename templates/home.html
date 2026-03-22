@@ -141,6 +141,12 @@
 </head>
 <body>
 
+    <!-- Startup Video -->
+    <video id="startupVideo" volume="1" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; object-fit: cover; opacity: 0; transition: opacity 1s ease; display: none;">
+        <source src="/static/appstarting.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
     <nav id="topbar">
         <a href="/" class="logo"><img src="/static/logo.png" alt="EcoCode" class="logo-box"> EcoCode</a>
         <div class="nav-links">
@@ -222,6 +228,28 @@
     <script>
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
+
+        // Startup video logic
+        const startupVideo = document.getElementById('startupVideo');
+        if (startupVideo && !sessionStorage.getItem('hasSeenStartup')) {
+            startupVideo.style.display = 'block';
+            startupVideo.style.opacity = '1';
+            startupVideo.play();
+
+            startupVideo.addEventListener('loadedmetadata', () => {
+                const duration = startupVideo.duration;
+                if (duration > 1.5) {
+                    setTimeout(() => {
+                        startupVideo.style.opacity = '0';
+                    }, (duration - 1.5) * 1000);
+                }
+            });
+
+            startupVideo.addEventListener('ended', () => {
+                startupVideo.style.display = 'none';
+                sessionStorage.setItem('hasSeenStartup', 'true');
+            });
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
             const themeToggle = document.getElementById('themeToggle');
