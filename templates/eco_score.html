@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoCode - Analiza Rezultata</title>
+    <title>{{ t.EcoCode }} - {{ t.Analysis_of_results }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -138,43 +138,43 @@
 <body>
 
     <nav id="topbar">
-        <a href="/" class="logo"><img src="/static/logo.png" alt="EcoCode" class="logo-box"> EcoCode</a>
+        <a href="/" class="logo"><img src="/static/logo.png" alt="{{ t.EcoCode }}" class="logo-box"> {{ t.EcoCode }}</a>
         <div class="nav-links">
-            <a href="/">Početna</a> 
-            <a href="/insights/gps">GPS</a> 
-            <a href="/track">Dnevnik</a> 
-            <a href="/eco-score?range=week" style="color: var(--accent);">Analiza</a>
+            <a href="/">{{ t.Home }}</a> 
+            <a href="/insights/gps">{{ t.GPS }}</a> 
+            <a href="/track">{{ t.Track }}</a> 
+            <a href="/eco-score?range=week" style="color: var(--accent);">{{ t.Analysis }}</a>
             
             {% if show_devtools %}
-                <a href="/devtools" class="btn-admin">Admin Alati</a>
+                <a href="/devtools" class="btn-admin">{{ t.Admin_Tools }}</a>
             {% endif %}
 
             {% if user %}
-                <a href="/profile" class="btn-primary">Profil</a>
+                <a href="/profile" class="btn-primary">{{ t.Profile }}</a>
             {% else %}
-                <a href="/login">Prijava</a>
-                <a href="/signup" class="btn-primary">Registracija</a>
+                <a href="/login">{{ t.Login }}</a>
+                <a href="/signup" class="btn-primary">{{ t.Signup }}</a>
             {% endif %}
         </div>
     </nav>
 
     <main>
         <div class="hero">
-            <h1 class="welcome-msg">Analiza Rezultata 📈</h1>
-            <p style="color: var(--text-soft); font-size: 1.1rem; margin-top: 10px;">Pregled tvog napretka u EcoCode sustavu.</p>
+            <h1 class="welcome-msg">{{ t.Analysis_of_results }} 📈</h1>
+            <p style="color: var(--text-soft); font-size: 1.1rem; margin-top: 10px;">{{ t.Overview_of_progress }}</p>
         </div>
 
         <div class="stats-grid">
             <div class="glass-card">
-                <small style="font-weight: 800; color: var(--text-soft); text-transform: uppercase;">Današnji Score</small>
+                <small style="font-weight: 800; color: var(--text-soft); text-transform: uppercase;">{{ t.Todays_Score }}</small>
                 <div class="value" id="latest-score-val">0<small>/ 100</small></div>
             </div>
             <div class="glass-card">
-                <small style="font-weight: 800; color: var(--text-soft); text-transform: uppercase;">Ušteda CO₂</small>
+                <small style="font-weight: 800; color: var(--text-soft); text-transform: uppercase;">{{ t.CO2_Savings }}</small>
                 <div class="value" id="co2-saved-val">0<small>kg</small></div>
             </div>
             <div class="glass-card">
-                <small style="font-weight: 800; color: var(--text-soft); text-transform: uppercase;">Status</small>
+                <small style="font-weight: 800; color: var(--text-soft); text-transform: uppercase;">{{ t.Status }}</small>
                 <div style="margin-top: 15px;">
                     <span id="status-badge" style="background: var(--accent); color: white; padding: 8px 20px; border-radius: 12px; font-size: 0.95rem; font-weight: 800;">NEMA PODATAKA</span>
                 </div>
@@ -182,7 +182,7 @@
         </div>
 
         <div class="glass-card">
-            <h3 style="margin: 0; font-weight: 800; font-size: 1.3rem;">Trend Održivosti</h3>
+            <h3 style="margin: 0; font-weight: 800; font-size: 1.3rem;">{{ t.Sustainability_Trend }}</h3>
             <div class="chart-container">
                 <canvas id="scoreChart"></canvas>
             </div>
@@ -194,14 +194,15 @@
         <div style="display: flex; align-items: center; gap: 15px;">
             <div style="background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 18px; font-size: 1.5rem;">🍃</div>
             <div>
-                <h4 style="margin: 0; color: var(--accent); font-weight: 800;">Savjet dana</h4>
-                <p id="pop-text" style="margin: 8px 0 0; font-size: 0.9rem; color: var(--text-soft); line-height: 1.4;">Bicikliranje štedi preko 90% CO₂ u usporedbi s autom.</p>
+                <h4 style="margin: 0; color: var(--accent); font-weight: 800;">{{ t.Tip_of_the_day }}</h4>
+                <p id="pop-text" style="margin: 8px 0 0; font-size: 0.9rem; color: var(--text-soft); line-height: 1.4;">{{ t.Biking_saves_CO2 }}</p>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        window.t = {{ t|tojson }};
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
         const isDark = savedTheme === 'dark';
@@ -212,8 +213,21 @@
         const scores = {{ scores|tojson }};
         const latestScore = scores.length > 0 ? scores[scores.length - 1].score : 0;
         const totalCo2 = scores.reduce((sum, s) => sum + s.co2, 0);
-        const statusText = latestScore >= 80 ? 'ODLIČNO 🌱' : latestScore >= 60 ? 'DOBRO 👍' : latestScore >= 40 ? 'OSREDNJE 🤔' : 'LOŠE 😞';
-        const statusColor = latestScore >= 80 ? 'var(--accent)' : latestScore >= 60 ? 'var(--secondary)' : latestScore >= 40 ? 'var(--gold)' : '#ef4444';
+        let statusText = window.t.No_data;
+        let statusColor = 'var(--accent)';
+        if (latestScore >= 80) {
+            statusText = window.t.Excellent;
+            statusColor = 'var(--accent)';
+        } else if (latestScore >= 60) {
+            statusText = window.t.Good;
+            statusColor = 'var(--secondary)';
+        } else if (latestScore >= 40) {
+            statusText = window.t.Average;
+            statusColor = 'var(--gold)';
+        } else if (latestScore > 0) {
+            statusText = window.t.Poor;
+            statusColor = '#ef4444';
+        }
 
         // Set values
         document.getElementById('latest-score-val').innerHTML = `${latestScore}<small>/ 100</small>`;

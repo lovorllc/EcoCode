@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prijava - EcoCode</title>
+    <title>{{ t.Login_title }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -148,45 +148,45 @@
 
     <div id="transition-overlay">
         <div class="leaf-loader">🌿</div>
-        <div style="color: white; font-weight: 800; margin-top: 20px; text-transform: uppercase; letter-spacing: 2px;">Prijava u sustav...</div>
+        <div style="color: white; font-weight: 800; margin-top: 20px; text-transform: uppercase; letter-spacing: 2px;">{{ t.Logging_in }}</div>
     </div>
 
     <nav id="topbar">
         <a href="/" class="logo"><img src="/static/logo.png" alt="EcoCode" class="logo-box"> EcoCode</a>
         <div class="nav-links">
-            <a href="/">Početna</a>
-            <a href="/insights/gps">GPS</a>
-            <a href="/track">Dnevnik</a>
-            <a href="/signup" style="font-weight: 800; color: var(--accent);">Registracija</a>
+            <a href="/">{{ t.Home }}</a>
+            <a href="/insights/gps">{{ t.GPS }}</a>
+            <a href="/track">{{ t.Track }}</a>
+            <a href="/signup" style="font-weight: 800; color: var(--accent);">{{ t.Signup }}</a>
         </div>
     </nav>
 
     <main>
         <div class="login-card">
-            <h1>Dobrodošli! 🌿</h1>
-            <p style="color: var(--text-soft); margin-bottom: 2.5rem; font-weight: 600;">Prijavite se za nastavak vašeg eko putovanja.</p>
+            <h1>{{ t.Welcome_exclamation }}</h1>
+            <p style="color: var(--text-soft); margin-bottom: 2.5rem; font-weight: 600;">{{ t.Login_to_continue }}</p>
 
             <form id="login-form" action="/login" method="post">
                 <div class="input-group">
-                    <label>Korisničko ime / Email</label>
-                    <input type="text" name="who" placeholder="Korisničko ime" required autofocus>
+                    <label>{{ t.Username_or_Email }}</label>
+                    <input type="text" name="who" placeholder="{{ t.Username }}" required autofocus>
                 </div>
 
                 <div class="input-group">
-                    <label>Lozinka</label>
+                    <label>{{ t.Password }}</label>
                     <input type="password" name="password" placeholder="••••••••" required>
                 </div>
 
-                <button type="submit" id="login-btn">Prijavi se</button>
+                <button type="submit" id="login-btn">{{ t.Login }}</button>
             </form>
 
             <div class="footer-links">
-                Novi ste ovdje? <a href="/signup">Izradite račun</a>
+                {{ t.New_here }} <a href="/signup">{{ t.Create_Account }}</a>
             </div>
         </div>
     </main>
 
-    <footer>&copy; 2026 EcoCode • Čuvamo tvoj digitalni otisak 🌱</footer>
+    <footer>{{ t.Footer_copyright }}</footer>
 
     <script>
         // Sinkronizacija teme

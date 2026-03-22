@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registracija - EcoCode</title>
+    <title>{{ t.Signup_title }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -233,37 +233,37 @@
     <nav id="topbar">
         <a href="/" class="logo"><img src="/static/logo.png" alt="EcoCode" class="logo-box"> EcoCode</a>
         <div class="nav-links">
-            <a href="/">Početna</a>
-            <a href="/insights/gps">GPS</a>
-            <a href="/track">Dnevnik</a>
-            <a href="/login" style="font-weight: 800; color: var(--accent);">Prijava</a>
+            <a href="/">{{ t.Home }}</a>
+            <a href="/insights/gps">{{ t.GPS }}</a>
+            <a href="/track">{{ t.Track }}</a>
+            <a href="/login" style="font-weight: 800; color: var(--accent);">{{ t.Login }}</a>
         </div>
     </nav>
 
     <main>
       <div class="signup-card">
-        <h1>Postani Eco Heroj 🌿</h1>
-        <p class="subtitle">Pridruži se pokretu za čišći planet.</p>
+        <h1>{{ t.Become_Eco_Hero }}</h1>
+        <p class="subtitle">{{ t.Join_movement }}</p>
 
         <form action="signup" method="post" id="signupForm">
           <div class="form-grid">
             <div class="input-group">
-              <label>Ime i prezime</label>
-              <input type="text" name="name" value="{{ name | default('') }}" placeholder="Ivan Horvat" required>
+              <label>{{ t.Full_Name }}</label>
+              <input type="text" name="name" value="{{ name | default('') }}" placeholder="{{ t.Name_placeholder }}" required>
             </div>
 
             <div class="input-group">
-              <label>Korisničko ime</label>
-              <input type="text" name="username" value="{{ username | default('') }}" placeholder="eko_warrior" required>
+              <label>{{ t.Username }}</label>
+              <input type="text" name="username" value="{{ username | default('') }}" placeholder="{{ t.Username_placeholder }}" required>
             </div>
 
             <div class="input-group">
-              <label>Email adresa</label>
-              <input type="email" name="email" value="{{ email | default('') }}" placeholder="ivan@primjer.hr" required>
+              <label>{{ t.Email_Address }}</label>
+              <input type="email" name="email" value="{{ email | default('') }}" placeholder="{{ t.Email_placeholder }}" required>
             </div>
 
             <div class="input-group">
-              <label>Država</label>
+              <label>{{ t.Country }}</label>
               <select name="country" id="country-select">
                 {% for code, label in countries %}
                   <option value="{{ code }}" {% if selected_country == code %}selected{% endif %}>{{ label }}</option>
@@ -272,24 +272,24 @@
             </div>
 
             <div class="input-group full-width">
-              <label>Broj telefona</label>
+              <label>{{ t.Phone_Number }}</label>
               <input type="text" id="phone-input" name="phone" value="{{ phone | default('') }}">
               <small style="font-size: 0.75rem; color: var(--text-soft); margin-top: 8px; display: block; font-weight: 600;">
-                Primjer: <span id="phone-hint" style="color: var(--accent);">{{ phone_example.display }}</span>
+                {{ t.Example }} <span id="phone-hint" style="color: var(--accent);">{{ phone_example.display }}</span>
               </small>
             </div>
 
             <div class="input-group">
-              <label>Lozinka</label>
+              <label>{{ t.Password }}</label>
               <div class="password-container">
                 <input type="password" id="password" name="password" required>
-                <button type="button" id="toggle-password">Prikaži</button>
+                <button type="button" id="toggle-password">{{ t.Show }}</button>
               </div>
               <div class="strength-meter"><div class="strength-bar" id="strength-bar"></div></div>
             </div>
 
             <div class="input-group">
-              <label>Potvrdi lozinku</label>
+              <label>{{ t.Confirm_Password }}</label>
               <input type="password" id="password-confirm" name="password_confirm" required>
             </div>
 
@@ -297,23 +297,23 @@
                 <div class="eula-group">
                     <input type="checkbox" id="eula-check" name="eula_accepted" required>
                     <label for="eula-check">
-                        Prihvaćam <a href="/eula.html">Uvjete korištenja i privatnosti</a> za EcoCode.
+                        {{ t.Accept_EULA }}
                     </label>
                 </div>
             </div>
           </div>
 
-          <button type="submit" id="submitBtn">Izradi račun</button>
+          <button type="submit" id="submitBtn">{{ t.Create_Account }}</button>
         </form>
 
         <div class="footer-links">
-          Već imaš račun? <a href="/login">Prijavi se</a>
+          {{ t.Already_have_account }} <a href="/login">{{ t.Login }}</a>
         </div>
       </div>
     </main>
 
     <footer>
-      &copy; 2026 EcoCode • Čuvamo tvoj digitalni otisak 🌱
+      {{ t.Footer_copyright }}
     </footer>
 
     <script>
@@ -343,7 +343,7 @@
         const isHidden = pwd.type === 'password';
         pwd.type = isHidden ? 'text' : 'password';
         document.getElementById('password-confirm').type = isHidden ? 'text' : 'password';
-        this.textContent = isHidden ? 'Sakrij' : 'Prikaži';
+        this.textContent = isHidden ? '{{ t.Hide }}' : '{{ t.Show }}';
       });
 
       // 3. Draft Persistence

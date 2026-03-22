@@ -148,22 +148,22 @@
     </video>
 
     <nav id="topbar">
-        <a href="/" class="logo"><img src="/static/logo.png" alt="EcoCode" class="logo-box"> EcoCode</a>
+        <a href="/" class="logo"><img src="/static/logo.png" alt="{{ t.EcoCode }}" class="logo-box"> {{ t.EcoCode }}</a>
         <div class="nav-links">
-            <a href="/">Početna</a> 
-            <a href="/insights/gps">GPS</a> 
-            <a href="/track">Dnevnik</a> 
-            <a href="/eco-score?range=week">Analiza</a>
+            <a href="/">{{ t.Home }}</a> 
+            <a href="/insights/gps">{{ t.GPS }}</a> 
+            <a href="/track">{{ t.Track }}</a> 
+            <a href="/eco-score?range=week">{{ t.Analysis }}</a>
             
             {% if show_devtools %}
-                <a href="/devtools" class="btn-admin">Admin Alati</a>
+                <a href="/devtools" class="btn-admin">{{ t.Admin_Tools }}</a>
             {% endif %}
 
             {% if user %}
-                <a href="/profile" class="btn-primary">Profil</a>
+                <a href="/profile" class="btn-primary">{{ t.Profile }}</a>
             {% else %}
-                <a href="/login">Prijava</a>
-                <a href="/signup" class="btn-primary">Registracija</a>
+                <a href="/login">{{ t.Login }}</a>
+                <a href="/signup" class="btn-primary">{{ t.Signup }}</a>
             {% endif %}
         </div>
     </nav>
@@ -171,35 +171,35 @@
     <main>
         {% if user %}
             <div class="hero">
-                <h1 class="welcome-msg">Bok, {{ user.username }}! 👋</h1>
-                <p style="color: var(--text-soft); font-weight: 500;">Tvoj trud čini razliku.</p>
+                <h1 class="welcome-msg">{{ t.Welcome_back }}, {{ user.username }}! 👋</h1>
+                <p style="color: var(--text-soft); font-weight: 500;">{{ t.Your_effort_matters }}</p>
             </div>
 
             <div class="main-grid">
                 <div class="content-area">
                     <section class="stat-group">
                         <div class="stat-card">
-                            <span class="stat-label">Emisija</span>
+                            <span class="stat-label">{{ t.Emission }}</span>
                             <div class="stat-val" id="dash-emitted">0.00<small>kg</small></div>
                         </div>
                         <div class="stat-card">
-                            <span class="stat-label">Ušteda</span>
+                            <span class="stat-label">{{ t.Savings }}</span>
                             <div class="stat-val" id="dash-saved" style="color: var(--accent);">0.00<small>kg</small></div>
                         </div>
                         <div class="stat-card">
-                            <span class="stat-label">Eko Score</span>
+                            <span class="stat-label">{{ t.Eco_Score }}</span>
                             <div class="stat-val" id="dash-score" style="color: var(--gold);">0</div>
                         </div>
                     </section>
                     <div class="glass-panel">
-                        <h3 style="margin:0 0 20px 0; font-weight: 800; color: var(--text-main);">Tjedna Aktivnost</h3>
+                        <h3 style="margin:0 0 20px 0; font-weight: 800; color: var(--text-main);">{{ t.Weekly_Activity }}</h3>
                         <div class="chart-container" id="chart"></div>
                     </div>
                 </div>
                 <div class="sidebar-area">
                     <div class="glass-panel streak-card">
                         <span class="streak-badge" id="streak-val">🔥 0</span>
-                        <p style="margin:0;">dana eko-svijesti</p>
+                        <p style="margin:0;">{{ t.Days_of_eco_consciousness }}</p>
                     </div>
                 </div>
             </div>
@@ -208,11 +208,11 @@
             <div style="text-align: center; padding: 60px 20px;">
                 <div class="glass-panel" style="padding: 60px 40px; max-width: 800px; margin: 0 auto;">
                     <div style="font-size: 5rem; margin-bottom: 20px;">🌱</div>
-                    <h1 class="welcome-msg">Dobrodošao u EcoCode</h1>
+                    <h1 class="welcome-msg">{{ t.Welcome }} u {{ t.EcoCode }}</h1>
                     <p style="color: var(--text-soft); margin: 20px auto 40px; font-size: 1.1rem;">
-                        Pridruži se zajednici koja aktivno mijenja svijet.
+                        {{ t.Join_community }}
                     </p>
-                    <a href="/signup" class="btn-primary" style="display: inline-block; padding: 15px 40px; font-size: 1.1rem;">Započni besplatno</a>
+                    <a href="/signup" class="btn-primary" style="display: inline-block; padding: 15px 40px; font-size: 1.1rem;">{{ t.Start_free }}</a>
                 </div>
             </div>
 

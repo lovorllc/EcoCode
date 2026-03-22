@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Postavke - {{ user.username }}</title>
+    <title>{{ t.Settings }} - {{ user.username }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -186,51 +186,62 @@
 <body>
 
     <nav id="topbar">
-        <a href="/" class="logo"><img src="/static/logo.png" alt="EcoCode" class="logo-box"> EcoCode</a>
+        <a href="/" class="logo"><img src="/static/logo.png" alt="{{ t.EcoCode }}" class="logo-box"> {{ t.EcoCode }}</a>
         <div class="nav-links">
-            <a href="/">Početna</a> 
-            <a href="/insights/gps">GPS</a> 
-            <a href="/track">Dnevnik</a> 
-            <a href="/eco-score?range=week">Analiza</a>
+            <a href="/">{{ t.Home }}</a> 
+            <a href="/insights/gps">{{ t.GPS }}</a> 
+            <a href="/track">{{ t.Track }}</a> 
+            <a href="/eco-score?range=week">{{ t.Analysis }}</a>
             
             {% if show_devtools %}
-                <a href="/devtools" class="btn-admin">Admin Alati</a>
+                <a href="/devtools" class="btn-admin">{{ t.Admin_Tools }}</a>
             {% endif %}
 
             {% if user %}
-                <a href="/profile" class="btn-primary">Profil</a>
+                <a href="/profile" class="btn-primary">{{ t.Profile }}</a>
             {% else %}
-                <a href="/login">Prijava</a>
-                <a href="/signup" class="btn-primary">Registracija</a>
+                <a href="/login">{{ t.Login }}</a>
+                <a href="/signup" class="btn-primary">{{ t.Signup }}</a>
             {% endif %}
         </div>
     </nav>
 
     <main>
-        <a href="/profile" class="back-button">← Povratak na profil</a>
+        <a href="/profile" class="back-button">← {{ t.Back_to_profile }}</a>
 
         <div class="settings-header">
-            <h1>Postavke Sustava ⚙️</h1>
-            <p>Prilagodite svoje iskustvo i upravljajte računom</p>
+            <h1>{{ t.System_Settings }} ⚙️</h1>
+            <p>{{ t.Customize_experience }}</p>
         </div>
 
         <div class="settings-grid">
             <a href="/users/{{ user.id }}/edit" class="settings-card">
                 <span class="settings-icon">👤</span>
-                <h3>Osobni podaci</h3>
-                <p>Promijenite ime, email, lozinku ili broj telefona</p>
+                <h3>{{ t.Personal_Data }}</h3>
+                <p>{{ t.Change_name_email }}</p>
             </a>
 
             <a href="#" onclick="handleThemeCard(event)" class="settings-card">
                 <span class="settings-icon">🎨</span>
-                <h3>Izgled sučelja</h3>
-                <p>Prebacite između svijetlog i tamnog načina rada</p>
+                <h3>{{ t.Interface_Appearance }}</h3>
+                <p>{{ t.Switch_themes }}</p>
             </a>
+
+            <div class="settings-card" onclick="handleLanguageCard(event)">
+                <span class="settings-icon">🌍</span>
+                <h3>{{ t.Language }}</h3>
+                <p>{{ t.Choose_language }}</p>
+                <select id="languageSelect" onchange="changeLanguage(this.value)" style="margin-top: 1rem; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--bg); color: var(--text-main);">
+                    <option value="hr" {% if lang == 'hr' %}selected{% endif %}>Hrvatski</option>
+                    <option value="en" {% if lang == 'en' %}selected{% endif %}>English</option>
+                    <option value="de" {% if lang == 'de' %}selected{% endif %}>Deutsch</option>
+                </select>
+            </div>
 
             <a href="/eula" class="settings-card">
                 <span class="settings-icon">📜</span>
-                <h3>EULA</h3>
-                <p>Pogledajte uvjete korištenja i pravila privatnosti</p>
+                <h3>{{ t.EULA }}</h3>
+                <p>{{ t.View_terms }}</p>
             </a>
         </div>
     </main>
@@ -255,6 +266,16 @@
         function handleThemeCard(e) {
             e.preventDefault();
             toggleTheme();
+        }
+
+        function handleLanguageCard(e) {
+            e.preventDefault();
+            // Focus on the select
+            document.getElementById('languageSelect').focus();
+        }
+
+        function changeLanguage(lang) {
+            window.location.href = '/set_lang?lang=' + lang;
         }
     </script>
 </body>

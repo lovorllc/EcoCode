@@ -14,6 +14,467 @@ import random
 import time
 from datetime import date, timedelta, datetime
 
+# Translations dictionary
+translations = {
+    'hr': {
+        'Home': 'Početna',
+        'GPS': 'GPS',
+        'Analysis': 'Analiza',
+        'Profile': 'Profil',
+        'Login': 'Prijava',
+        'Signup': 'Registracija',
+        'Welcome': 'Dobrodošao',
+        'Welcome_back': 'Bok',
+        'Your_effort_matters': 'Tvoj trud čini razliku.',
+        'Emission': 'Emisija',
+        'Savings': 'Ušteda',
+        'Eco_Score': 'Eko Score',
+        'Weekly_Activity': 'Tjedna Aktivnost',
+        'Streak': 'Niz',
+        'Days_of_eco_consciousness': 'dana eko-svijesti',
+        'Start_free': 'Započni besplatno',
+        'Analysis_of_results': 'Analiza Rezultata',
+        'Overview_of_progress': 'Pregled tvog napretka u EcoCode sustavu.',
+        'Todays_Score': 'Današnji Score',
+        'CO2_Savings': 'Ušteda CO₂',
+        'Status': 'Status',
+        'Excellent': 'ODLIČNO',
+        'Good': 'DOBRO',
+        'Average': 'OSREDNJE',
+        'Poor': 'LOŠE',
+        'No_data': 'NEMA PODATAKA',
+        'Sustainability_Trend': 'Trend Održivosti',
+        'Tip_of_the_day': 'Savjet dana',
+        'Biking_saves_CO2': 'Bicikliranje štedi preko 90% CO₂ u usporedbi s autom.',
+        'EcoCode': 'EcoCode',
+        'Dashboard': 'Nadzorna ploča',
+        'Logout': 'Odjava',
+        'Settings': 'Postavke',
+        'Users': 'Korisnici',
+        'Activities': 'Aktivnosti',
+        'GPS_Tracking': 'GPS Praćenje',
+        'Insights': 'Uvidi',
+        'Track': 'Dnevnik',
+        'Admin_Tools': 'Admin Alati',
+        'Start_EcoCode': 'Pokreni EcoCode',
+        'Join_community': 'Pridruži se zajednici koja aktivno mijenja svijet.',
+        'Settings': 'Postavke',
+        'System_Settings': 'Postavke Sustava',
+        'Customize_experience': 'Prilagodite svoje iskustvo i upravljajte računom',
+        'Back_to_profile': 'Povratak na profil',
+        'Personal_Data': 'Osobni podaci',
+        'Change_name_email': 'Promijenite ime, email, lozinku ili broj telefona',
+        'Interface_Appearance': 'Izgled sučelja',
+        'Switch_themes': 'Prebacite između svijetlog i tamnog načina rada',
+        'Language': 'Jezik',
+        'Choose_language': 'Odaberite željeni jezik aplikacije',
+        'EULA': 'EULA',
+        'View_terms': 'Pogledajte uvjete korištenja i pravila privatnosti',
+        # Track page translations
+        'Activity_Diary': 'Dnevnik aktivnosti',
+        'Track_Activities': 'Prati aktivnosti 🌱',
+        'Record_daily_habits': 'Zabilježi svoje dnevne navike i smanji otisak.',
+        'New_Entry': 'Nova bilješka',
+        'Category': 'Kategorija',
+        'Subtype': 'Podtip',
+        'Quantity': 'Količina',
+        'CO2_kg': 'CO₂ (kg)',
+        'Add': 'Dodaj',
+        'Transport': 'Transport',
+        'Electricity': 'Struja',
+        'Water': 'Voda',
+        'Food': 'Hrana',
+        'Shopping': 'Kupovina',
+        'History': 'Povijest zapisa',
+        'Loading': 'Učitavanje...',
+        'No_records_yet': 'Još nema zapisa.',
+        'Total_Impact': 'Ukupni utjecaj',
+        'CO2_Collected': 'CO₂ prikupljeno',
+        'Tip': 'Savjet',
+        'Shower_tip': 'Smanjenjem tuširanja za samo 2 minute štediš do 40 litara vode dnevno!',
+        'Admin_Emission_Factors': '🛠 Admin: Emisijski faktori',
+        'Add_Factor': 'Dodaj faktor',
+        'Cat': 'Kat.',
+        'Sub': 'Sub.',
+        'Unit': 'Jed.',
+        'kg_per_unit': 'kg/jed',
+        'Save': 'Spremi',
+        'Footer': 'EcoCode &copy; 2026 • Čuvamo tvoj ekološki otisak 🌱',
+        'Delete': 'Obriši',
+        'Confirm_delete': 'Obrisati zapis?',
+        # Profile page translations
+        'Profile_title': 'Profil',
+        'Logging_out': 'Odjavljivanje...',
+        'Dashboard': 'Nadzorna ploča',
+        'Settings_emoji': '⚙️ Postavke',
+        'Logout': 'Odjavi se',
+        'Account_Data': 'Podaci računa',
+        'Email': 'E-mail',
+        'Phone': 'Telefon',
+        'Member_since': 'Član od',
+        'Not_entered': 'Nije uneseno',
+        'Not_connected': 'Nije povezano',
+        'Your_effort_matters_planet': 'Tvoj trud čini razliku za planetu! 🌱',
+        # Daily CO2 page translations
+        'CO2_Insights': 'CO₂ Insights',
+        'Profile_prefix': '👤 ',
+        'Emission_Statistics': 'Statistika Emisija',
+        'Visual_overview_environmental_impact': 'Vizualni pregled vašeg utjecaja na okoliš.',
+        'Time': 'Vrijeme:',
+        'Today': 'Danas',
+        'Last_7_days': 'Zadnjih 7 dana',
+        'Last_30_days': 'Zadnjih 30 dana',
+        'Base_CO2': 'Bazna CO₂',
+        'Activities': 'Aktivnosti',
+        'Base': 'Baza',
+        'Footprint_analysis_for_date': 'Analiza footprinta za datum: ',
+        'by_EcoCode': ' • by EcoCode',
+        # Login page translations
+        'Login_title': 'Login - EcoCode',
+        'Logging_in': 'Logging in...',
+        'Welcome_exclamation': 'Welcome! 🌿',
+        'Login_to_continue': 'Log in to continue your eco journey.',
+        'Username_or_Email': 'Username / Email',
+        'Username': 'Username',
+        'Password': 'Password',
+        'Login': 'Log in',
+        'New_here': 'New here? Create an account',
+        'Footer_copyright': '&copy; 2026 EcoCode • We preserve your digital footprint 🌱',
+        # Signup page translations
+        'Signup_title': 'Signup - EcoCode',
+        'Become_Eco_Hero': 'Become an Eco Hero 🌿',
+        'Join_movement': 'Join the movement for a cleaner planet.',
+        'Full_Name': 'Full Name',
+        'Name_placeholder': 'John Doe',
+        'Username_placeholder': 'eco_warrior',
+        'Email_Address': 'Email Address',
+        'Email_placeholder': 'john@example.com',
+        'Country': 'Country',
+        'Phone_Number': 'Phone Number',
+        'Example': 'Example:',
+        'Confirm_Password': 'Confirm Password',
+        'Accept_EULA': 'I accept the Terms of Use and Privacy Policy for EcoCode.',
+        'Create_Account': 'Create Account',
+        'Already_have_account': 'Already have an account? Log in',
+        'Show': 'Show',
+        'Hide': 'Hide',
+        # Add more as needed
+    },
+    'en': {
+        'Home': 'Home',
+        'GPS': 'GPS',
+        'Analysis': 'Analysis',
+        'Profile': 'Profile',
+        'Login': 'Login',
+        'Signup': 'Signup',
+        'Welcome': 'Welcome',
+        'Welcome_back': 'Hi',
+        'Your_effort_matters': 'Your effort matters.',
+        'Emission': 'Emission',
+        'Savings': 'Savings',
+        'Eco_Score': 'Eco Score',
+        'Weekly_Activity': 'Weekly Activity',
+        'Streak': 'Streak',
+        'Days_of_eco_consciousness': 'days of eco-consciousness',
+        'Start_free': 'Start free',
+        'Analysis_of_results': 'Analysis of Results',
+        'Overview_of_progress': 'Overview of your progress in the EcoCode system.',
+        'Todays_Score': 'Today\'s Score',
+        'CO2_Savings': 'CO₂ Savings',
+        'Status': 'Status',
+        'Excellent': 'EXCELLENT',
+        'Good': 'GOOD',
+        'Average': 'AVERAGE',
+        'Poor': 'POOR',
+        'No_data': 'NO DATA',
+        'Sustainability_Trend': 'Sustainability Trend',
+        'Tip_of_the_day': 'Tip of the day',
+        'Biking_saves_CO2': 'Biking saves over 90% CO₂ compared to car.',
+        'EcoCode': 'EcoCode',
+        'Dashboard': 'Dashboard',
+        'Logout': 'Logout',
+        'Settings': 'Settings',
+        'Users': 'Users',
+        'Activities': 'Activities',
+        'GPS_Tracking': 'GPS Tracking',
+        'Insights': 'Insights',
+        'Track': 'Track',
+        'Admin_Tools': 'Admin Tools',
+        'Start_EcoCode': 'Start EcoCode',
+        'Join_community': 'Join the community that actively changes the world.',
+        'Settings': 'Settings',
+        'System_Settings': 'System Settings',
+        'Customize_experience': 'Customize your experience and manage your account',
+        'Back_to_profile': 'Back to profile',
+        'Personal_Data': 'Personal Data',
+        'Change_name_email': 'Change name, email, password or phone number',
+        'Interface_Appearance': 'Interface Appearance',
+        'Switch_themes': 'Switch between light and dark mode',
+        'Language': 'Language',
+        'Choose_language': 'Choose your preferred application language',
+        'EULA': 'EULA',
+        'View_terms': 'View terms of use and privacy policy',
+        # Track page translations
+        'Activity_Diary': 'Activity Diary',
+        'Track_Activities': 'Track Activities 🌱',
+        'Record_daily_habits': 'Record your daily habits and reduce your footprint.',
+        'New_Entry': 'New Entry',
+        'Category': 'Category',
+        'Subtype': 'Subtype',
+        'Quantity': 'Quantity',
+        'CO2_kg': 'CO₂ (kg)',
+        'Add': 'Add',
+        'Transport': 'Transport',
+        'Electricity': 'Electricity',
+        'Water': 'Water',
+        'Food': 'Food',
+        'Shopping': 'Shopping',
+        'History': 'History',
+        'Loading': 'Loading...',
+        'No_records_yet': 'No records yet.',
+        'Total_Impact': 'Total Impact',
+        'CO2_Collected': 'CO₂ Collected',
+        'Tip': 'Tip',
+        'Shower_tip': 'Reducing your shower by just 2 minutes saves up to 40 liters of water daily!',
+        'Admin_Emission_Factors': '🛠 Admin: Emission Factors',
+        'Add_Factor': 'Add Factor',
+        'Cat': 'Cat.',
+        'Sub': 'Sub.',
+        'Unit': 'Unit',
+        'kg_per_unit': 'kg/unit',
+        'Save': 'Save',
+        'Footer': 'EcoCode &copy; 2026 • We preserve your ecological footprint 🌱',
+        'Delete': 'Delete',
+        'Confirm_delete': 'Delete record?',
+        # Profile page translations
+        'Profile_title': 'Profile',
+        'Logging_out': 'Logging out...',
+        'Dashboard': 'Dashboard',
+        'Settings_emoji': '⚙️ Settings',
+        'Logout': 'Logout',
+        'Account_Data': 'Account Data',
+        'Email': 'Email',
+        'Phone': 'Phone',
+        'Member_since': 'Member since',
+        'Not_entered': 'Not entered',
+        'Not_connected': 'Not connected',
+        'Your_effort_matters_planet': 'Your effort makes a difference for the planet! 🌱',
+        # Daily CO2 page translations
+        'CO2_Insights': 'CO₂ Insights',
+        'Profile_prefix': '👤 ',
+        'Emission_Statistics': 'Emission Statistics',
+        'Visual_overview_environmental_impact': 'Visual overview of your environmental impact.',
+        'Time': 'Time:',
+        'Today': 'Today',
+        'Last_7_days': 'Last 7 days',
+        'Last_30_days': 'Last 30 days',
+        'Base_CO2': 'Base CO₂',
+        'Activities': 'Activities',
+        'Base': 'Base',
+        'Footprint_analysis_for_date': 'Footprint analysis for date: ',
+        'by_EcoCode': ' • by EcoCode',
+        # Login page translations
+        'Login_title': 'Login - EcoCode',
+        'Logging_in': 'Logging in...',
+        'Welcome_exclamation': 'Welcome! 🌿',
+        'Login_to_continue': 'Log in to continue your eco journey.',
+        'Username_or_Email': 'Username / Email',
+        'Username': 'Username',
+        'Password': 'Password',
+        'Login': 'Log in',
+        'New_here': 'New here? Create an account',
+        'Footer_copyright': '&copy; 2026 EcoCode • We preserve your digital footprint 🌱',
+        # Signup page translations
+        'Signup_title': 'Signup - EcoCode',
+        'Become_Eco_Hero': 'Become an Eco Hero 🌿',
+        'Join_movement': 'Join the movement for a cleaner planet.',
+        'Full_Name': 'Full Name',
+        'Name_placeholder': 'John Doe',
+        'Username_placeholder': 'eco_warrior',
+        'Email_Address': 'Email Address',
+        'Email_placeholder': 'john@example.com',
+        'Country': 'Country',
+        'Phone_Number': 'Phone Number',
+        'Example': 'Example:',
+        'Confirm_Password': 'Confirm Password',
+        'Accept_EULA': 'I accept the Terms of Use and Privacy Policy for EcoCode.',
+        'Create_Account': 'Create Account',
+        'Already_have_account': 'Already have an account? Log in',
+        'Show': 'Show',
+        'Hide': 'Hide',
+        # GPS Tracking page translations
+        'GPS_Tracking_title': 'GPS Tracking',
+        'Record_eco_movement': 'Record your eco movement and earn points.',
+        'Activity_Type': 'Activity Type',
+        'Walking': '🚶 Walking',
+        'Biking': '🚲 Biking',
+        'Hiking': '🥾 Hiking',
+        'Route_Name': 'Route Name',
+        'Morning_walk_example': 'E.g. Morning walk...',
+        'Start': '▶ Start',
+        'Stop': '■ Stop',
+        'Save': '✔ Save',
+        'Clear': '✕ Clear',
+        'Distance': 'Distance',
+        'Points': 'Points',
+        'Time': 'Time',
+        'Route_History': '📑 Route History',
+        'No_saved_routes': 'No saved routes yet.',
+        'Footer_simple': 'EcoCode &copy; 2026 • 🌱',
+        # Add more as needed
+    },
+    'de': {
+        'Home': 'Startseite',
+        'GPS': 'GPS',
+        'Analysis': 'Analyse',
+        'Profile': 'Profil',
+        'Login': 'Anmelden',
+        'Signup': 'Registrieren',
+        'Welcome': 'Willkommen',
+        'Welcome_back': 'Hallo',
+        'Your_effort_matters': 'Deine Anstrengung zählt.',
+        'Emission': 'Emission',
+        'Savings': 'Einsparungen',
+        'Eco_Score': 'Eco Score',
+        'Weekly_Activity': 'Wöchentliche Aktivität',
+        'Streak': 'Serie',
+        'Days_of_eco_consciousness': 'Tage des Umweltbewusstseins',
+        'Start_free': 'Kostenlos starten',
+        'Analysis_of_results': 'Analyse der Ergebnisse',
+        'Overview_of_progress': 'Überblick über deinen Fortschritt im EcoCode-System.',
+        'Todays_Score': 'Heutiger Score',
+        'CO2_Savings': 'CO₂-Einsparungen',
+        'Status': 'Status',
+        'Excellent': 'AUSGEZEICHNET',
+        'Good': 'GUT',
+        'Average': 'MITTEL',
+        'Poor': 'SCHLECHT',
+        'No_data': 'KEINE DATEN',
+        'Sustainability_Trend': 'Nachhaltigkeitstrend',
+        'Tip_of_the_day': 'Tipp des Tages',
+        'Biking_saves_CO2': 'Radfahren spart über 90% CO₂ im Vergleich zum Auto.',
+        'EcoCode': 'EcoCode',
+        'Dashboard': 'Dashboard',
+        'Logout': 'Abmelden',
+        'Settings': 'Einstellungen',
+        'Users': 'Benutzer',
+        'Activities': 'Aktivitäten',
+        'GPS_Tracking': 'GPS-Tracking',
+        'Insights': 'Einblicke',
+        'Track': 'Track',
+        'Admin_Tools': 'Admin-Tools',
+        'Start_EcoCode': 'EcoCode starten',
+        'Join_community': 'Trete der Gemeinschaft bei, die die Welt aktiv verändert.',
+        'Settings': 'Einstellungen',
+        'System_Settings': 'Systemeinstellungen',
+        'Customize_experience': 'Passe deine Erfahrung an und verwalte dein Konto',
+        'Back_to_profile': 'Zurück zum Profil',
+        'Personal_Data': 'Persönliche Daten',
+        'Change_name_email': 'Name, E-Mail, Passwort oder Telefonnummer ändern',
+        'Interface_Appearance': 'Oberflächenerscheinung',
+        'Switch_themes': 'Zwischen hellem und dunklem Modus wechseln',
+        'Language': 'Sprache',
+        'Choose_language': 'Wähle deine bevorzugte Anwendungssprache',
+        'EULA': 'EULA',
+        'View_terms': 'Nutzungsbedingungen und Datenschutzrichtlinie anzeigen',
+        # Track page translations
+        'Activity_Diary': 'Aktivitätstagebuch',
+        'Track_Activities': 'Aktivitäten verfolgen 🌱',
+        'Record_daily_habits': 'Zeichne deine täglichen Gewohnheiten auf und reduziere deinen Fußabdruck.',
+        'New_Entry': 'Neuer Eintrag',
+        'Category': 'Kategorie',
+        'Subtype': 'Untertyp',
+        'Quantity': 'Menge',
+        'CO2_kg': 'CO₂ (kg)',
+        'Add': 'Hinzufügen',
+        'Transport': 'Transport',
+        'Electricity': 'Strom',
+        'Water': 'Wasser',
+        'Food': 'Essen',
+        'Shopping': 'Einkaufen',
+        'History': 'Verlauf',
+        'Loading': 'Laden...',
+        'No_records_yet': 'Noch keine Aufzeichnungen.',
+        'Total_Impact': 'Gesamte Auswirkung',
+        'CO2_Collected': 'CO₂ gesammelt',
+        'Tip': 'Tipp',
+        'Shower_tip': 'Wenn du deine Dusche nur um 2 Minuten verkürzt, sparst du bis zu 40 Liter Wasser pro Tag!',
+        'Admin_Emission_Factors': '🛠 Admin: Emissionsfaktoren',
+        'Add_Factor': 'Faktor hinzufügen',
+        'Cat': 'Kat.',
+        'Sub': 'Sub.',
+        'Unit': 'Einheit',
+        'kg_per_unit': 'kg/Einheit',
+        'Save': 'Speichern',
+        'Footer': 'EcoCode &copy; 2026 • Wir bewahren deinen ökologischen Fußabdruck 🌱',
+        'Delete': 'Löschen',
+        'Confirm_delete': 'Aufzeichnung löschen?',
+        # Profile page translations
+        'Profile_title': 'Profil',
+        'Logging_out': 'Abmelden...',
+        'Dashboard': 'Dashboard',
+        'Settings_emoji': '⚙️ Einstellungen',
+        'Logout': 'Abmelden',
+        'Account_Data': 'Kontodaten',
+        'Email': 'E-Mail',
+        'Phone': 'Telefon',
+        'Member_since': 'Mitglied seit',
+        'Not_entered': 'Nicht eingegeben',
+        'Not_connected': 'Nicht verbunden',
+        'Your_effort_matters_planet': 'Deine Anstrengung macht einen Unterschied für den Planeten! 🌱',
+        # Daily CO2 page translations
+        'CO2_Insights': 'CO₂-Einblicke',
+        'Profile_prefix': '👤 ',
+        'Emission_Statistics': 'Emissionsstatistik',
+        'Visual_overview_environmental_impact': 'Visuelle Übersicht über Ihre Umweltbelastung.',
+        'Time': 'Zeit:',
+        'Today': 'Heute',
+        'Last_7_days': 'Letzte 7 Tage',
+        'Last_30_days': 'Letzte 30 Tage',
+        'Base_CO2': 'Basis-CO₂',
+        'Activities': 'Aktivitäten',
+        'Base': 'Basis',
+        'Footprint_analysis_for_date': 'Fußabdruckanalyse für Datum: ',
+        'by_EcoCode': ' • von EcoCode',
+        # Login page translations
+        'Login_title': 'Anmelden - EcoCode',
+        'Logging_in': 'Anmeldung läuft...',
+        'Welcome_exclamation': 'Willkommen! 🌿',
+        'Login_to_continue': 'Melden Sie sich an, um Ihre Öko-Reise fortzusetzen.',
+        'Username_or_Email': 'Benutzername / E-Mail',
+        'Username': 'Benutzername',
+        'Password': 'Passwort',
+        'Login': 'Anmelden',
+        'New_here': 'Neu hier? Konto erstellen',
+        'Footer_copyright': '&copy; 2026 EcoCode • Wir bewahren Ihren digitalen Fußabdruck 🌱',
+        # Signup page translations
+        'Signup_title': 'Registrieren - EcoCode',
+        'Become_Eco_Hero': 'Werden Sie ein Öko-Held 🌿',
+        'Join_movement': 'Treten Sie der Bewegung für einen saubereren Planeten bei.',
+        'Full_Name': 'Vollständiger Name',
+        'Name_placeholder': 'Max Mustermann',
+        'Username_placeholder': 'oeko_krieger',
+        'Email_Address': 'E-Mail-Adresse',
+        'Email_placeholder': 'max@beispiel.de',
+        'Country': 'Land',
+        'Phone_Number': 'Telefonnummer',
+        'Example': 'Beispiel:',
+        'Confirm_Password': 'Passwort bestätigen',
+        'Accept_EULA': 'Ich akzeptiere die Nutzungsbedingungen und Datenschutzrichtlinie für EcoCode.',
+        'Create_Account': 'Konto erstellen',
+        'Already_have_account': 'Bereits ein Konto? Anmelden',
+        'Show': 'Anzeigen',
+        'Hide': 'Verbergen',
+        # Add more
+    }
+}
+
+def get_lang(request: Request) -> str:
+    lang = request.query_params.get('lang') or request.session.get('lang', 'hr')
+    if lang not in translations:
+        lang = 'hr'
+    return lang
+
 # user type choices for UI
 USER_TYPES = [("user","User"), ("admin","Admin")]
 
@@ -157,11 +618,18 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     show = is_session_admin(request)
+    lang = get_lang(request)
+    t = translations[lang]
     if 'user' in request.session:
         user = db.get_user_by_username(request.session.get('user'))
         u = dict(user) if user else None
-        return templates.TemplateResponse("home.html", {"request": request, "show_devtools": show, "user": u})
-    return templates.TemplateResponse("home.html", {"request": request, "show_devtools": show})
+        return templates.TemplateResponse("home.html", {"request": request, "show_devtools": show, "user": u, "t": t, "lang": lang})
+    return templates.TemplateResponse("home.html", {"request": request, "show_devtools": show, "t": t, "lang": lang})
+
+@app.get('/set_lang')
+def set_lang(request: Request, lang: str = Query(...)):
+    request.session['lang'] = lang
+    return RedirectResponse('/', status_code=303)
 
 @app.get('/insights/gps', response_class=HTMLResponse)
 def gps_tracking_page(request: Request):
@@ -1178,9 +1646,11 @@ def devtools_page(request: Request):
 
 @app.get("/signup", response_class=HTMLResponse)
 def signup_page(request: Request):
+    lang = get_lang(request)
+    t = translations[lang]
     ex = example_for_country('HR')
     examples_map = {code: example_for_country(code)['display'] for code, _ in COUNTRY_CHOICES}
-    return templates.TemplateResponse("signup.html", {"request": request, "countries": COUNTRY_CHOICES, "selected_country": 'HR', "phone_example": ex, "examples_map": examples_map, "name": '', "phone": '', "username": ''})
+    return templates.TemplateResponse("signup.html", {"request": request, "countries": COUNTRY_CHOICES, "selected_country": 'HR', "phone_example": ex, "examples_map": examples_map, "name": '', "phone": '', "username": '', "t": t, "lang": lang})
 
 
 @app.post("/signup")
@@ -1262,7 +1732,9 @@ def eula_page(request: Request):
 
 @app.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    lang = get_lang(request)
+    t = translations[lang]
+    return templates.TemplateResponse("login.html", {"request": request, "t": t, "lang": lang})
 
 
 @app.post("/login")
@@ -1549,7 +2021,9 @@ def profile_page(request: Request):
     if 'theme' not in u or u['theme'] is None:
         u['theme'] = 'light'
     show_devtools = is_session_admin(request)
-    return templates.TemplateResponse('profile.html', {'request': request, 'user': u, 'show_devtools': show_devtools})
+    lang = get_lang(request)
+    t = translations[lang]
+    return templates.TemplateResponse('profile.html', {'request': request, 'user': u, 'show_devtools': show_devtools, 't': t, 'lang': lang})
 
 
 @app.get('/settings', response_class=HTMLResponse)
@@ -1561,7 +2035,9 @@ def settings_page(request: Request):
     if not user:
         return RedirectResponse('/login')
     u = dict(user) if not isinstance(user, dict) else user
-    return templates.TemplateResponse('settings.html', {'request': request, 'user': u})
+    lang = get_lang(request)
+    t = translations[lang]
+    return templates.TemplateResponse('settings.html', {'request': request, 'user': u, 't': t, 'lang': lang})
 
 
 @app.post('/profile')
@@ -1636,6 +2112,9 @@ def daily_co2_page(request: Request, period: str = Query('hour', alias='range'))
             # set date to today for display
             context['date'] = str(date.today())
             context['points'] = data.get('points')
+        lang = get_lang(request)
+        t = translations[lang]
+        context.update({'t': t, 'lang': lang})
         return templates.TemplateResponse('daily_co2.html', context)
     return RedirectResponse('/?msg=Error+loading+data')
 
@@ -1651,8 +2130,10 @@ def eco_score_page(request: Request, period: str = Query('week', alias='range'))
     u = dict(user) if not isinstance(user, dict) else user
     data = api_user_eco_scores(request, u.get('id'), period)
     show_devtools = is_session_admin(request)
+    lang = get_lang(request)
+    t = translations[lang]
     if isinstance(data, dict) and data.get('scores') is not None:
-        return templates.TemplateResponse('eco_score.html', {'request': request, 'user': u, 'range': period, 'scores': data.get('scores'), 'show_devtools': show_devtools})
+        return templates.TemplateResponse('eco_score.html', {'request': request, 'user': u, 'range': period, 'scores': data.get('scores'), 'show_devtools': show_devtools, 't': t, 'lang': lang})
     return RedirectResponse('/?msg=Error+loading+data')
 
 
@@ -1671,7 +2152,9 @@ def gps_tracking_page(request: Request):
     except Exception:
         tracks = []
     show_devtools = is_session_admin(request)
-    return templates.TemplateResponse('gps_tracking.html', {'request': request, 'user': u, 'tracks': tracks, 'show_devtools': show_devtools})
+    lang = get_lang(request)
+    t = translations[lang]
+    return templates.TemplateResponse('gps_tracking.html', {'request': request, 'user': u, 'tracks': tracks, 'show_devtools': show_devtools, 't': t, 'lang': lang})
 
 
 @app.get('/admin/users/{user_id}/tracks', response_class=HTMLResponse)
@@ -1925,7 +2408,9 @@ def track_page(request: Request):
     # fetch recent activities for display
     activities = [dict(r) for r in db.get_activities_for_user(u.get('id'), limit=100)]
     show_devtools = is_session_admin(request)
-    return templates.TemplateResponse('track.html', {'request': request, 'user': u, 'metrics': metrics, 'activities': activities, 'show_devtools': show_devtools})
+    lang = get_lang(request)
+    t = translations[lang]
+    return templates.TemplateResponse('track.html', {'request': request, 'user': u, 'metrics': metrics, 'activities': activities, 'show_devtools': show_devtools, 't': t, 'lang': lang})
 
 @app.post('/api/emission_factors')
 def api_set_emission_factor(request: Request, category: str = Form(...), subtype: str = Form(None), unit: str = Form(None), co2_kg_per_unit: float = Form(...), source: str = Form(None)):

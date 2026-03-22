@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoCode - CO₂ Insights</title>
+    <title>EcoCode - {{ t.CO2_Insights }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -158,23 +158,23 @@
 
     <nav id="topbar">
         <a href="/" class="logo"><img src="/static/logo.png" alt="EcoCode" class="logo-box"> EcoCode</a>
-        <a href="/profile" class="btn-profile">👤 {{ user.username }}</a>
+        <a href="/profile" class="btn-profile">{{ t.Profile_prefix }}{{ user.username }}</a>
     </nav>
 
     <main>
         <div class="header-section">
             <div>
-                <h1>Statistika Emisija</h1>
-                <p style="color: var(--text-soft);">Vizualni pregled vašeg utjecaja na okoliš.</p>
+                <h1>{{ t.Emission_Statistics }}</h1>
+                <p style="color: var(--text-soft);">{{ t.Visual_overview_environmental_impact }}</p>
             </div>
             
             <form method="get" id="rangeForm">
                 <div class="controls">
-                    <label style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--accent);">Vrijeme:</label>
+                    <label style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--accent);">{{ t.Time }}</label>
                     <select name="range" onchange="this.form.submit()">
-                        <option value="hour" {% if range == 'hour' %}selected{% endif %}>Danas</option>
-                        <option value="week" {% if range == 'week' %}selected{% endif %}>Zadnjih 7 dana</option>
-                        <option value="month" {% if range == 'month' %}selected{% endif %}>Zadnjih 30 dana</option>
+                        <option value="hour" {% if range == 'hour' %}selected{% endif %}>{{ t.Today }}</option>
+                        <option value="week" {% if range == 'week' %}selected{% endif %}>{{ t.Last_7_days }}</option>
+                        <option value="month" {% if range == 'month' %}selected{% endif %}>{{ t.Last_30_days }}</option>
                     </select>
                 </div>
             </form>
@@ -186,14 +186,14 @@
             </div>
 
             <div class="legend-custom">
-                <div class="legend-item"><div class="dot" style="background: #10b981;"></div> Bazna CO₂</div>
-                <div class="legend-item"><div class="dot" style="background: #fbbf24;"></div> Aktivnosti</div>
+                <div class="legend-item"><div class="dot" style="background: #10b981;"></div> {{ t.Base_CO2 }}</div>
+                <div class="legend-item"><div class="dot" style="background: #fbbf24;"></div> {{ t.Activities }}</div>
             </div>
         </section>
     </main>
 
     <footer>
-        Analiza footprinta za datum: <strong>{{ date }}</strong> • by EcoCode
+        {{ t.Footprint_analysis_for_date }}<strong>{{ date }}</strong>{{ t.by_EcoCode }}
     </footer>
 
     
@@ -219,13 +219,13 @@
                 labels: labels,
                 datasets: [
                     {
-                        label: 'Baza',
+                        label: '{{ t.Base }}',
                         data: baseData,
                         backgroundColor: '#10b981',
                         borderRadius: 10,
                     },
                     {
-                        label: 'Aktivnosti',
+                        label: '{{ t.Activities }}',
                         data: activityData,
                         backgroundColor: isDark ? '#fbbf24' : '#ffab40',
                         borderRadius: 10,

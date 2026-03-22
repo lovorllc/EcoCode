@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoCode - Dnevnik aktivnosti</title>
+    <title>EcoCode - {{ t.Activity_Diary }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -213,95 +213,95 @@
     <nav id="topbar">
         <a href="/" class="logo"><img src="/static/logo.png" alt="EcoCode" class="logo-box"> EcoCode</a>
         <div class="nav-links">
-            <a href="/">Početna</a> <a href="/insights/gps">GPS</a> <a href="/track">Dnevnik</a> <a href="/eco-score?range=week">Analiza</a>
-            {% if show_devtools %}<a href="/devtools" class="btn-admin">Admin Alati</a>{% endif %}
-            {% if user %}<a href="/profile" class="btn-primary">Profil</a>{% endif %}
+            <a href="/">{{ t.Home }}</a> <a href="/insights/gps">{{ t.GPS }}</a> <a href="/track">{{ t.Track }}</a> <a href="/eco-score?range=week">{{ t.Analysis }}</a>
+            {% if show_devtools %}<a href="/devtools" class="btn-admin">{{ t.Admin_Tools }}</a>{% endif %}
+            {% if user %}<a href="/profile" class="btn-primary">{{ t.Profile }}</a>{% endif %}
         </div>
     </nav>
 
     <main>
         <div class="hero-section">
-            <h1>Prati aktivnosti 🌱</h1>
-            <p style="color: var(--text-soft); font-weight: 500;">Zabilježi svoje dnevne navike i smanji otisak.</p>
+            <h1>{{ t.Track_Activities }}</h1>
+            <p style="color: var(--text-soft); font-weight: 500;">{{ t.Record_daily_habits }}</p>
         </div>
 
         <section class="glass-card">
-            <label style="display: block; margin-bottom: 20px;">Nova bilješka</label>
+            <label style="display: block; margin-bottom: 20px;">{{ t.New_Entry }}</label>
             <form id="trackForm" onsubmit="event.preventDefault(); submitActivity();" class="track-form">
                 <div class="input-group">
-                    <label>Kategorija</label>
+                    <label>{{ t.Category }}</label>
                     <select id="category" required>
-                        <option value="Transport">Transport</option>
-                        <option value="Electricity">Struja</option>
-                        <option value="Water">Voda</option>
-                        <option value="Food">Hrana</option>
-                        <option value="Shopping">Kupovina</option>
+                        <option value="Transport">{{ t.Transport }}</option>
+                        <option value="Electricity">{{ t.Electricity }}</option>
+                        <option value="Water">{{ t.Water }}</option>
+                        <option value="Food">{{ t.Food }}</option>
+                        <option value="Shopping">{{ t.Shopping }}</option>
                     </select>
                 </div>
 
                 <div class="input-group">
-                    <label>Podtip</label>
+                    <label>{{ t.Subtype }}</label>
                     <select id="subtype"></select>
                 </div>
 
                 <div class="input-group">
-                    <label>Količina (<span id="unitLabel">km</span>)</label>
+                    <label>{{ t.Quantity }} (<span id="unitLabel">km</span>)</label>
                     <input id="quantity" type="number" step="0.01" placeholder="0.00">
                 </div>
 
                 <div class="input-group">
-                    <label>CO₂ (kg)</label>
-                    <input id="co2" type="number" step="0.01" placeholder="Izračun..." readonly style="opacity: 0.7;">
+                    <label>{{ t.CO2_kg }}</label>
+                    <input id="co2" type="number" step="0.01" placeholder="{{ t.Loading }}" readonly style="opacity: 0.7;">
                 </div>
 
                 <div class="input-group">
-                    <button type="submit" class="btn-add">Dodaj</button>
+                    <button type="submit" class="btn-add">{{ t.Add }}</button>
                 </div>
             </form>
         </section>
 
         <div class="grid-layout">
             <div id="activities-container">
-                <h3 style="font-weight: 800; margin-bottom: 1.5rem;">Povijest zapisa</h3>
-                <div id="activities">Učitavanje...</div>
+                <h3 style="font-weight: 800; margin-bottom: 1.5rem;">{{ t.History }}</h3>
+                <div id="activities">{{ t.Loading }}</div>
             </div>
 
             <aside>
                 <div class="glass-card totals-card">
-                    <h4>Ukupni utjecaj</h4>
+                    <h4>{{ t.Total_Impact }}</h4>
                     <div id="totals" class="total-value">0.00 kg</div>
-                    <p style="margin: 0; font-size: 0.8rem; font-weight: 600;">CO₂ prikupljeno</p>
+                    <p style="margin: 0; font-size: 0.8rem; font-weight: 600;">{{ t.CO2_Collected }}</p>
                 </div>
 
                 
 
                 <div class="glass-card" style="margin-top: 20px; padding: 20px;">
-                    <h5 style="margin: 0 0 10px 0;">Savjet</h5>
-                    <p style="font-size: 0.85rem; color: var(--text-soft); margin: 0;">Smanjenjem tuširanja za samo 2 minute štediš do 40 litara vode dnevno!</p>
+                    <h5 style="margin: 0 0 10px 0;">{{ t.Tip }}</h5>
+                    <p style="font-size: 0.85rem; color: var(--text-soft); margin: 0;">{{ t.Shower_tip }}</p>
                 </div>
             </aside>
         </div>
 
         {% if current_is_admin %}
         <section class="admin-section">
-            <h4 style="margin: 0; font-weight: 800;">🛠 Admin: Emisijski faktori</h4>
-            <div id="admin-factors" style="overflow-x: auto;">Učitavanje...</div>
+            <h4 style="margin: 0; font-weight: 800;">{{ t.Admin_Emission_Factors }}</h4>
+            <div id="admin-factors" style="overflow-x: auto;">{{ t.Loading }}</div>
             
             <div class="glass-card" style="margin-top: 20px; border-style: solid;">
-                <h5 style="margin-top: 0;">Dodaj faktor</h5>
+                <h5 style="margin-top: 0;">{{ t.Add_Factor }}</h5>
                 <form id="addFactorForm" onsubmit="event.preventDefault(); addFactor();" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px;">
-                    <input id="af_category" placeholder="Kat." required>
-                    <input id="af_subtype" placeholder="Sub.">
-                    <input id="af_unit" placeholder="Jed.">
-                    <input id="af_co2" placeholder="kg/jed" type="number" step="0.0001" required>
-                    <button type="submit" class="btn-add" style="padding: 10px;">Spremi</button>
+                    <input id="af_category" placeholder="{{ t.Cat }}" required>
+                    <input id="af_subtype" placeholder="{{ t.Sub }}">
+                    <input id="af_unit" placeholder="{{ t.Unit }}">
+                    <input id="af_co2" placeholder="{{ t.kg_per_unit }}" type="number" step="0.0001" required>
+                    <button type="submit" class="btn-add" style="padding: 10px;">{{ t.Save }}</button>
                 </form>
             </div>
         </section>
         {% endif %}
     </main>
 
-    <footer>EcoCode &copy; 2026 • Čuvamo tvoj ekološki otisak 🌱</footer>
+    <footer>{{ t.Footer }}</footer>
 
     <script>
         const CURRENT_USER_ID = {{ user.id }};
@@ -351,7 +351,7 @@
         function renderActivities(list) {
             const el = document.getElementById('activities');
             if (!list.length) {
-                el.innerHTML = '<div class="glass-card" style="text-align:center; color:var(--text-soft)">Još nema zapisa.</div>';
+                el.innerHTML = '<div class="glass-card" style="text-align:center; color:var(--text-soft)">{{ t.No_records_yet }}</div>';
                 return;
             }
             
@@ -359,12 +359,12 @@
                 <div class="activity-item">
                     <div class="activity-info">
                         <h4>${a.category} <span style="font-weight:400; color:var(--text-soft); font-size: 0.9rem;">• ${a.subtype}</span></h4>
-                        <small>${new Date(a.created_at).toLocaleDateString('hr-HR')} ${a.note ? '— ' + a.note : ''}</small>
+                        <small>${new Date(a.created_at).toLocaleDateString('{{ lang }}-{{ lang|upper }}')} ${a.note ? '— ' + a.note : ''}</small>
                     </div>
                     <div class="activity-meta">
                         <span class="co2-val">${Number(a.co2_kg).toFixed(2)} kg</span>
                         <small>${a.quantity} ${a.unit}</small>
-                        ${a.user_id === CURRENT_USER_ID ? `<button class="btn-delete" onclick="deleteActivity(${a.id})">Obriši</button>` : ''}
+                        ${a.user_id === CURRENT_USER_ID ? `<button class="btn-delete" onclick="deleteActivity(${a.id})">{{ t.Delete }}</button>` : ''}
                     </div>
                 </div>
             `).join('');
@@ -393,7 +393,7 @@
         }
 
         async function deleteActivity(id) {
-            if (confirm('Obrisati zapis?')) {
+            if (confirm('{{ t.Confirm_delete }}')) {
                 await fetch(`/api/activities/${id}/delete`, {method:'POST'});
                 fetchActivities();
             }

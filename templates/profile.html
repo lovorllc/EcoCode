@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profil - {{ user.username }}</title>
+    <title>{{ t.Profile_title }} - {{ user.username }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -173,26 +173,26 @@
 
     <div id="logout-overlay">
         <div class="logout-spinner"></div>
-        <p style="color: white; margin-top: 20px; font-weight: 700;">Odjavljivanje...</p>
+        <p style="color: white; margin-top: 20px; font-weight: 700;">{{ t.Logging_out }}</p>
     </div>
 
     <nav id="topbar">
         <a href="/" class="logo"><img src="/static/logo.png" alt="EcoCode" class="logo-box"> EcoCode</a>
         <div class="nav-links">
-            <a href="/">Početna</a> 
-            <a href="/insights/gps">GPS</a> 
-            <a href="/track">Dnevnik</a> 
-            <a href="/eco-score?range=week">Analiza</a>
+            <a href="/">{{ t.Home }}</a> 
+            <a href="/insights/gps">{{ t.GPS }}</a> 
+            <a href="/track">{{ t.Track }}</a> 
+            <a href="/eco-score?range=week">{{ t.Analysis }}</a>
             
             {% if show_devtools %}
-                <a href="/devtools" class="btn-admin">Admin Alati</a>
+                <a href="/devtools" class="btn-admin">{{ t.Admin_Tools }}</a>
             {% endif %}
 
             {% if user %}
-                <a href="/profile" class="btn-primary">Profil</a>
+                <a href="/profile" class="btn-primary">{{ t.Profile }}</a>
             {% else %}
-                <a href="/login">Prijava</a>
-                <a href="/signup" class="btn-primary">Registracija</a>
+                <a href="/login">{{ t.Login }}</a>
+                <a href="/signup" class="btn-primary">{{ t.Signup }}</a>
             {% endif %}
         </div>
     </nav>
@@ -208,42 +208,42 @@
                 <div class="username-tag">@{{ user.username }}</div>
 
                 <div class="btn-group">
-                    <a href="/" class="btn btn-accent">Nadzorna ploča</a>
-                    <a href="/settings" class="btn btn-outline">⚙️ Postavke</a>
-                    <button onclick="animateLogout()" class="btn btn-logout">Odjavi se</button>
+                    <a href="/" class="btn btn-accent">{{ t.Dashboard }}</a>
+                    <a href="/settings" class="btn btn-outline">{{ t.Settings_emoji }}</a>
+                    <button onclick="animateLogout()" class="btn btn-logout">{{ t.Logout }}</button>
                 </div>
             </div>
 
             <div class="glass-card">
-                <h3 style="margin: 0 0 1.5rem 0; font-weight: 800;">Podaci računa</h3>
+                <h3 style="margin: 0 0 1.5rem 0; font-weight: 800;">{{ t.Account_Data }}</h3>
                 
                 <div class="info-item">
                     <div class="info-icon">📧</div>
                     <div class="info-content">
-                        <span class="info-label">E-mail</span>
-                        <div class="info-value">{{ user.email if user.email else 'Nije uneseno' }}</div>
+                        <span class="info-label">{{ t.Email }}</span>
+                        <div class="info-value">{{ user.email if user.email else t.Not_entered }}</div>
                     </div>
                 </div>
 
                 <div class="info-item">
                     <div class="info-icon">📱</div>
                     <div class="info-content">
-                        <span class="info-label">Telefon</span>
-                        <div class="info-value">{{ user.phone if user.phone else 'Nije povezano' }}</div>
+                        <span class="info-label">{{ t.Phone }}</span>
+                        <div class="info-value">{{ user.phone if user.phone else t.Not_connected }}</div>
                     </div>
                 </div>
 
                 <div class="info-item">
                     <div class="info-icon">📅</div>
                     <div class="info-content">
-                        <span class="info-label">Član od</span>
+                        <span class="info-label">{{ t.Member_since }}</span>
                         <div class="info-value">{{ user.created_at[:10] if user.created_at else '2026-01-28' }}</div>
                     </div>
                 </div>
 
                 <div style="margin-top: 2rem; padding: 20px; background: rgba(16, 185, 129, 0.05); border-radius: 20px; border: 1px dashed var(--accent); text-align: center;">
                     <p style="margin: 0; font-size: 0.9rem; color: var(--accent-dark); font-weight: 700;">
-                        Tvoj trud čini razliku za planetu! 🌱
+                        {{ t.Your_effort_matters_planet }}
                     </p>
                 </div>
             </div>

@@ -8,3 +8,4 @@ PyJWT
 python-jose
 python-multipart
 httpx
+Flask-Babel
