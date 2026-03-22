@@ -170,8 +170,10 @@
         footer { text-align: center; padding: 40px; color: var(--text-soft); font-size: 0.85rem; font-weight: 600; }
 
         .logo-box {
-            width: 40px; height: 40px; 
-            border-radius: 12px; object-fit: contain;
+            width: 56px; height: 56px;
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 12px;
+            object-fit: contain;
         }
 
     </style>
@@ -179,10 +181,7 @@
 <body>
 
     <nav id="topbar">
-        <a href="/" class="logo">
-            <img src="/static/logo.png" alt="EcoCode" class="logo-box">
-            EcoCode <span>Admin.</span>
-        </a>
+        <a href="/" class="logo"><img src="/static/logo.png" alt="EcoCode" class="logo-box"> EcoCode</a>
         <div>
             {% if get_current_user(request) %}
                 <span class="dev-badge">ADMIN: {{ get_current_user(request) }}</span>

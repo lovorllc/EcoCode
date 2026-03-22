@@ -142,8 +142,10 @@
         footer { margin-top: 40px; color: var(--text-soft); font-size: 0.8rem; font-weight: 600; }
 
         .logo-box {
-            width: 40px; height: 40px; 
-            border-radius: 12px; object-fit: contain;
+            width: 56px; height: 56px;
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 12px;
+            object-fit: contain;
         }
 
     </style>
@@ -151,10 +153,7 @@
 <body>
 
     <nav id="topbar">
-        <a href="/" class="logo">
-            <img src="/static/logo.png" alt="EcoCode" class="logo-box">
-            EcoCode <span>Security</span>
-        </a>
+        <a href="/" class="logo"><img src="/static/logo.png" alt="EcoCode" class="logo-box"> EcoCode</a>
         <a href="/profile" style="text-decoration: none; color: var(--text-main); font-weight: 700; font-size: 0.9rem;">👤 Admin</a>
     </nav>
 

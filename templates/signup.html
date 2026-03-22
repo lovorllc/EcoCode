@@ -66,8 +66,10 @@
             text-decoration: none; display: flex; align-items: center; gap: 12px;
         }
         .logo-box {
-            width: 40px; height: 40px; 
-            border-radius: 12px; object-fit: contain;
+            width: 56px; height: 56px;
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 12px;
+            object-fit: contain;
         }
 
         .nav-links { display: flex; gap: 10px; align-items: center; }
@@ -226,10 +228,7 @@
 <body>
 
     <nav id="topbar">
-        <a href="/" class="logo">
-            <img src="/static/logo.png" alt="EcoCode" class="logo-box">
-            EcoCode
-        </a>
+        <a href="/" class="logo"><img src="/static/logo.png" alt="EcoCode" class="logo-box"> EcoCode</a>
         <div class="nav-links">
             <a href="/">Početna</a>
             <a href="/insights/gps">GPS</a>
