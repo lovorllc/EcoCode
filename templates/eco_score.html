@@ -52,7 +52,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.8rem 5%;
+            padding: 0 4%;
+            height: 66px;
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -61,13 +62,15 @@
 
         .logo {
             font-weight: 800; font-size: 1.5rem; color: var(--text-main);
-            text-decoration: none; display: flex; align-items: center; gap: 12px;
+            text-decoration: none; display: flex; align-items: center;
         }
         .logo-box {
-            width: 56px; height: 56px;
+            width: 95px; height: 95px;
+            min-width: 95px; min-height: 95px;
             display: inline-flex; align-items: center; justify-content: center;
-            border-radius: 12px;
+            border-radius: 16px;
             object-fit: contain;
+            margin-top: -10px; margin-bottom: -10px;
         }
 
         .nav-links { display: flex; gap: 10px; align-items: center; }
@@ -164,16 +167,16 @@
         <div class="stats-grid">
             <div class="glass-card">
                 <small style="font-weight: 800; color: var(--text-soft); text-transform: uppercase;">Današnji Score</small>
-                <div class="value" id="latest-score-val">84<small>/ 100</small></div>
+                <div class="value" id="latest-score-val">0<small>/ 100</small></div>
             </div>
             <div class="glass-card">
                 <small style="font-weight: 800; color: var(--text-soft); text-transform: uppercase;">Ušteda CO₂</small>
-                <div class="value" id="co2-saved-val">12.8<small>kg</small></div>
+                <div class="value" id="co2-saved-val">0<small>kg</small></div>
             </div>
             <div class="glass-card">
                 <small style="font-weight: 800; color: var(--text-soft); text-transform: uppercase;">Status</small>
                 <div style="margin-top: 15px;">
-                    <span style="background: var(--accent); color: white; padding: 8px 20px; border-radius: 12px; font-size: 0.95rem; font-weight: 800;">ODLIČNO 🌱</span>
+                    <span id="status-badge" style="background: var(--accent); color: white; padding: 8px 20px; border-radius: 12px; font-size: 0.95rem; font-weight: 800;">NEMA PODATAKA</span>
                 </div>
             </div>
         </div>
@@ -205,6 +208,24 @@
 
         function closePopup() { document.getElementById('eco-popup').classList.remove('active'); }
 
+        // Get scores data from backend
+        const scores = {{ scores|tojson }};
+        const latestScore = scores.length > 0 ? scores[scores.length - 1].score : 0;
+        const totalCo2 = scores.reduce((sum, s) => sum + s.co2, 0);
+        const statusText = latestScore >= 80 ? 'ODLIČNO 🌱' : latestScore >= 60 ? 'DOBRO 👍' : latestScore >= 40 ? 'OSREDNJE 🤔' : 'LOŠE 😞';
+        const statusColor = latestScore >= 80 ? 'var(--accent)' : latestScore >= 60 ? 'var(--secondary)' : latestScore >= 40 ? 'var(--gold)' : '#ef4444';
+
+        // Set values
+        document.getElementById('latest-score-val').innerHTML = `${latestScore}<small>/ 100</small>`;
+        document.getElementById('co2-saved-val').innerHTML = `${totalCo2.toFixed(1)}<small>kg</small>`;
+        const statusBadge = document.getElementById('status-badge');
+        statusBadge.textContent = statusText;
+        statusBadge.style.background = statusColor;
+
+        // Prepare chart data
+        const labels = scores.map(s => new Date(s.date).toLocaleDateString('hr-HR', { month: 'short', day: 'numeric' }));
+        const data = scores.map(s => s.score);
+
         const ctx = document.getElementById('scoreChart').getContext('2d');
         const gradient = ctx.createLinearGradient(0, 0, 0, 400);
         gradient.addColorStop(0, isDark ? 'rgba(52, 211, 153, 0.4)' : 'rgba(16, 185, 129, 0.3)');
@@ -213,9 +234,9 @@
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Pon', 'Uto', 'Sri', 'Čet', 'Pet', 'Sub', 'Ned'],
+                labels: labels,
                 datasets: [{
-                    data: [65, 78, 72, 85, 80, 92, 84],
+                    data: data,
                     borderColor: '#10b981',
                     borderWidth: 4,
                     pointBackgroundColor: '#ffffff',

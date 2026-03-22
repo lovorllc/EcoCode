@@ -48,11 +48,12 @@
         /* --- TOPBAR --- */
         #topbar {
             background: var(--card-bg);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(15px);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.8rem 5%;
+            padding: 0 4%;
+            height: 66px;
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -60,8 +61,8 @@
         }
 
         .logo {
-            font-weight: 800; font-size: 1.4rem; color: var(--text-main);
-            text-decoration: none; display: flex; align-items: center; gap: 12px;
+            font-weight: 800; font-size: 1.5rem; color: var(--text-main);
+            text-decoration: none; display: flex; align-items: center;
         }
         .logo span { color: var(--accent-blue); }
 
@@ -170,10 +171,12 @@
         footer { text-align: center; padding: 40px; color: var(--text-soft); font-size: 0.85rem; font-weight: 600; }
 
         .logo-box {
-            width: 56px; height: 56px;
+            width: 95px; height: 95px;
+            min-width: 95px; min-height: 95px;
             display: inline-flex; align-items: center; justify-content: center;
-            border-radius: 12px;
+            border-radius: 16px;
             object-fit: contain;
+            margin-top: -10px; margin-bottom: -10px;
         }
 
     </style>

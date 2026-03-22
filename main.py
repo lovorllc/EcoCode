@@ -377,7 +377,7 @@ def api_user_eco_scores(request: Request, user_id: int, period: str = Query('wee
             score = 0
         else:
             score = int(max(0, min(100, 100 - co2 * 3)))
-        scores.append({'date': day_str, 'score': score})
+        scores.append({'date': day_str, 'score': score, 'co2': co2})
     return {'range': period, 'scores': scores}
 
 
