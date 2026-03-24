@@ -1,10 +1,11 @@
 <!doctype html>
-<html lang="hr">
+<html lang="{{ lang }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ t.Login_title }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
     <style>
         :root {
             /* SVJETLA ECO TEMA */
@@ -157,7 +158,7 @@
             <a href="/">{{ t.Home }}</a>
             <a href="/insights/gps">{{ t.GPS }}</a>
             <a href="/track">{{ t.Track }}</a>
-            <a href="/signup" style="font-weight: 800; color: var(--accent);">{{ t.Signup }}</a>
+            <a href="/signup?lang={{ lang }}" style="font-weight: 800; color: var(--accent);">{{ t.Signup }}</a>
         </div>
     </nav>
 
@@ -181,7 +182,7 @@
             </form>
 
             <div class="footer-links">
-                {{ t.New_here }} <a href="/signup">{{ t.Create_Account }}</a>
+                {{ t.New_here }} <a href="/signup?lang={{ lang }}">{{ t.Create_Account }}</a>
             </div>
         </div>
     </main>
@@ -193,6 +194,31 @@
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
 
+        // Auto-detect language based on geolocation
+        (function() {
+          const urlParams = new URLSearchParams(window.location.search);
+          if (!urlParams.has('lang')) {
+            fetch('https://ipapi.co/json/')
+              .then(response => response.json())
+              .then(data => {
+                const countryCode = data.country_code;
+                let lang = 'hr'; // default
+                if (countryCode === 'HR') lang = 'hr';
+                else if (countryCode === 'DE') lang = 'de';
+                else lang = 'en';
+                document.cookie = "lang=" + lang + "; path=/; max-age=31536000";
+                document.documentElement.lang = lang;
+                if (lang !== 'hr') {
+                  window.location.href = window.location.pathname + '?lang=' + lang;
+                }
+              })
+              .catch(() => {
+                document.cookie = "lang=hr; path=/; max-age=31536000";
+                document.documentElement.lang = 'hr';
+              });
+          }
+        })();
+
         const loginForm = document.getElementById('login-form');
         const overlay = document.getElementById('transition-overlay');
 
@@ -203,7 +229,33 @@
                 loginForm.submit();
             }, 1200);
         });
-    </script>
 
+        // Cookie consent
+        window.cookieTranslations = {
+          message: "{{ t.cookie_message }}",
+          dismiss: "{{ t.cookie_dismiss }}",
+          link: "{{ t.cookie_link }}"
+        };
+        window.addEventListener("load", function(){
+          window.cookieconsent.initialise({
+            "palette": {
+              "popup": {
+                "background": "#000"
+              },
+              "button": {
+                "background": "#10b981"
+              }
+            },
+            "theme": "classic",
+            "content": {
+              "message": window.cookieTranslations.message,
+              "dismiss": window.cookieTranslations.dismiss,
+              "link": window.cookieTranslations.link,
+              "href": "/eula"
+            }
+          });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
 </body>
 </html>

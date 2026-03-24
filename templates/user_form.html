@@ -205,8 +205,8 @@
     <nav id="topbar">
         <a href="/" class="logo"><img src="/static/logo.png" alt="EcoCode" class="logo-box"> EcoCode</a>
         <div class="nav-links">
-            <a href="/">Početna</a> <a href="/insights/gps">GPS</a> <a href="/track">Dnevnik</a> <a href="/eco-score?range=week">Analiza</a>
-            {% if user %}<a href="/profile" class="btn-nav-profile">Profil</a>{% endif %}
+            <a href="/">{{ t.Home }}</a> <a href="/insights/gps">{{ t.GPS }}</a> <a href="/track">{{ t.Track }}</a> <a href="/eco-score?range=week">{{ t.Analysis }}</a>
+            {% if user %}<a href="/profile" class="btn-nav-profile">{{ t.Profile }}</a>{% endif %}
         </div>
     </nav>
 

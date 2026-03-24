@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, Form, Depends, HTTPException, Query
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
+from jinja2 import FileSystemLoader, Environment
 import os
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
@@ -18,11 +19,11 @@ from datetime import date, timedelta, datetime
 translations = {
     'hr': {
         'Home': 'Početna',
-        'GPS': 'GPS',
+        'GPS': 'GPS praćenje',
         'Analysis': 'Analiza',
         'Profile': 'Profil',
-        'Login': 'Prijava',
-        'Signup': 'Registracija',
+        'Login': 'Prijavi se',
+        'Signup': 'Registriraj se',
         'Welcome': 'Dobrodošao',
         'Welcome_back': 'Bok',
         'Your_effort_matters': 'Tvoj trud čini razliku.',
@@ -99,7 +100,45 @@ translations = {
         'Unit': 'Jed.',
         'kg_per_unit': 'kg/jed',
         'Save': 'Spremi',
-        'Footer': 'EcoCode &copy; 2026 • Čuvamo tvoj ekološki otisak 🌱',
+        'Footer': 'EcoCode | NLimit &copy; 2026 • Čuvamo tvoj ekološki otisak 🌱',
+        'Home_title': 'EcoCode - Nadzorna ploča',
+        'Tap_to_unmute': 'Dodirnite za uključivanje zvuka',
+        'Dark_theme': 'Tamna tema',
+        'EULA_title': 'Uvjeti korištenja 🌿',
+        'EULA_updated': 'Ažurirano: 24. ožujka 2026.',
+        'EULA_intro': 'Dobrodošli u EcoCode, digitalni servis specijaliziran za praćenje i analizu osobnog ugljičnog otiska. EcoCode je službeni projekt razvijen unutar NLimit platforme, koja služi kao inkubator za inovativna softverska rješenja i digitalnu održivost.',
+        'EULA_agreement': 'Korištenjem aplikacije EcoCode na domeni ecocode.codes ili povezanim servisima, pristajete na sljedeće uvjete:',
+        'EULA_section1_title': '1. Vlasništvo i licenca',
+        'EULA_section1_content': 'EcoCode je autorsko djelo i intelektualno vlasništvo unutar NLimit platforme. Korisniku se dodjeljuje pravo na osobno, nekomercijalno korištenje platforme u svrhe osvještavanja ekološke održivosti. Bilo kakav pokušaj neovlaštenog pristupa bazi podataka, modifikacija izvornog koda ili zlouporaba NLimit tehnologije strogo je zabranjena.',
+        'EULA_section2_title': '2. Privatnost i GPS praćenje',
+        'EULA_section2_content': 'Za pružanje preciznog izračuna, aplikacija koristi GPS koordinate korisnika isključivo za mjerenje prijeđene udaljenosti. NLimit platforma se obvezuje da se podaci o lokaciji koriste isključivo za potrebe trenutnog izračuna emisija unutar aplikacije. Vaši podaci su privatni i neće biti ustupani trećim stranama bez vaše izričite privole.',
+        'EULA_section3_title': '3. Metodologija i točnost podataka',
+        'EULA_section3_content': 'Izračuni emisija CO₂ unutar EcoCode servisa temelje se na općeprihvaćenim ekološkim koeficijentima (npr. prosječne emisije za putnička vozila). Ovi podaci služe kao informativni prikaz i edukativni alat. NLimit ne jamči apsolutnu znanstvenu preciznost te se ovi podaci ne smiju koristiti kao službeni certifikati u pravnim ili komercijalnim poslovima.',
+        'EULA_section4_title': '4. Korisnički račun i sigurnost',
+        'EULA_section4_content': 'Korisnik je odgovoran za čuvanje tajnosti svojih pristupnih podataka. NLimit preporučuje korištenje jedinstvenih lozinki radi zaštite integriteta vašeg profila i povijesti izračuna.',
+        'EULA_section5_title': '5. Ograničenje odgovornosti',
+        'EULA_section5_content': 'Korištenjem ovog servisa, korisnik prihvaća da NLimit platforma i njezini autori nisu odgovorni za bilo kakvu neizravnu štetu, gubitak podataka ili tehničke prekide u radu aplikacije. Servis se pruža "onakav kakav jest" u svrhu promicanja ekološke svijesti.',
+        'EULA_section6_title': '6. Izmjene i budući razvoj',
+        'EULA_section6_content': 'Zadržavamo pravo izmjene ovih uvjeta u skladu s tehničkim napretkom aplikacije ili promjenama u regulativama o zaštiti podataka. Budući da je EcoCode dio šireg NLimit ekosustava, korisnici će biti obaviješteni o svim značajnim nadogradnjama ili integracijama novih alata.',
+        'EULA_button': 'Razumijem, nastavi',
+        # Signup page translations
+        'Signup_title': 'Registracija - EcoCode',
+        'Become_Eco_Hero': 'Postani eko heroj 🌿',
+        'Join_movement': 'Pridruži se pokretu za čišći planet.',
+        'Full_Name': 'Puno ime',
+        'Name_placeholder': 'Ivan Horvat',
+        'Username_placeholder': 'eko_ratnik',
+        'Email_Address': 'E-mail adresa',
+        'Email_placeholder': 'ivan@primjer.hr',
+        'Country': 'Država',
+        'Phone_Number': 'Broj telefona',
+        'Example': 'Primjer:',
+        'Confirm_Password': 'Potvrdi lozinku',
+        'Accept_EULA': 'Prihvaćam <a href="/eula?from=signup" target="_blank" style="color: #10b981; text-decoration: none; font-weight: 600;">uvjete korištenja i politiku privatnosti</a> za EcoCode.',
+        'Create_Account': 'Kreiraj račun',
+        'Already_have_account': 'Već imate račun? Prijavite se',
+        'Show': 'Prikaži',
+        'Hide': 'Sakrij',
         'Delete': 'Obriši',
         'Confirm_delete': 'Obrisati zapis?',
         # Profile page translations
@@ -139,7 +178,7 @@ translations = {
         'Password': 'Password',
         'Login': 'Log in',
         'New_here': 'New here? Create an account',
-        'Footer_copyright': '&copy; 2026 EcoCode • We preserve your digital footprint 🌱',
+        'Footer_copyright': '&copy; 2026 EcoCode | NLimit • Čuvamo tvoj ekološki otisak 🌱',
         # Signup page translations
         'Signup_title': 'Signup - EcoCode',
         'Become_Eco_Hero': 'Become an Eco Hero 🌿',
@@ -153,11 +192,14 @@ translations = {
         'Phone_Number': 'Phone Number',
         'Example': 'Example:',
         'Confirm_Password': 'Confirm Password',
-        'Accept_EULA': 'I accept the Terms of Use and Privacy Policy for EcoCode.',
+        'Accept_EULA': 'I accept the <a href="/eula?from=signup" target="_blank" style="color: #10b981; text-decoration: none; font-weight: 600;">Terms of Use and Privacy Policy</a> for EcoCode.',
         'Create_Account': 'Create Account',
         'Already_have_account': 'Already have an account? Log in',
         'Show': 'Show',
         'Hide': 'Hide',
+        'cookie_message': 'This website uses cookies to ensure you get the best experience.',
+        'cookie_dismiss': 'Got it!',
+        'cookie_link': 'Learn more',
         # Add more as needed
     },
     'en': {
@@ -243,7 +285,27 @@ translations = {
         'Unit': 'Unit',
         'kg_per_unit': 'kg/unit',
         'Save': 'Save',
-        'Footer': 'EcoCode &copy; 2026 • We preserve your ecological footprint 🌱',
+        'Footer': 'EcoCode | NLimit &copy; 2026 • Čuvamo tvoj ekološki otisak 🌱',
+        'Home_title': 'EcoCode - Dashboard',
+        'Tap_to_unmute': 'Tap to unmute sound',
+        'Dark_theme': 'Dark theme',
+        'EULA_title': 'Terms of Use 🌿',
+        'EULA_updated': 'Updated: March 24, 2026.',
+        'EULA_intro': 'Welcome to EcoCode, a digital service specialized in tracking and analyzing your personal carbon footprint. EcoCode is an official project developed within the NLimit platform, which serves as an incubator for innovative software solutions and digital sustainability.',
+        'EULA_agreement': 'By using the EcoCode application on the ecocode.codes domain or related services, you agree to the following terms:',
+        'EULA_section1_title': '1. Ownership and License',
+        'EULA_section1_content': 'EcoCode is an original work and intellectual property within the NLimit platform. The user is granted the right to personal, non-commercial use of the platform for the purpose of raising awareness of ecological sustainability. Any attempt of unauthorized access to the database, modification of the source code, or misuse of NLimit technology is strictly prohibited.',
+        'EULA_section2_title': '2. Privacy and GPS Tracking',
+        'EULA_section2_content': 'To provide accurate calculation, the application uses GPS coordinates of the user exclusively for measuring the distance traveled. The NLimit platform commits that location data is used exclusively for the needs of current emission calculations within the application. Your data is private and will not be transferred to third parties without your explicit consent.',
+        'EULA_section3_title': '3. Methodology and Data Accuracy',
+        'EULA_section3_content': 'CO₂ emission calculations within the EcoCode service are based on generally accepted ecological coefficients (e.g., average emissions for passenger vehicles). This data serves as an informative display and educational tool. NLimit does not guarantee absolute scientific accuracy and this data must not be used as official certificates in legal or commercial matters.',
+        'EULA_section4_title': '4. User Account and Security',
+        'EULA_section4_content': 'The user is responsible for keeping their access data secret. NLimit recommends using unique passwords to protect the integrity of your profile and calculation history.',
+        'EULA_section5_title': '5. Limitation of Liability',
+        'EULA_section5_content': 'By using this service, the user accepts that the NLimit platform and its authors are not responsible for any indirect damage, data loss, or technical interruptions in the application. The service is provided "as is" for the purpose of promoting ecological awareness.',
+        'EULA_section6_title': '6. Changes and Future Development',
+        'EULA_section6_content': 'We reserve the right to change these terms in accordance with the technical progress of the application or changes in data protection regulations. Since EcoCode is part of the broader NLimit ecosystem, users will be notified of all significant upgrades or integration of new tools.',
+        'EULA_button': 'I understand, continue',
         'Delete': 'Delete',
         'Confirm_delete': 'Delete record?',
         # Profile page translations
@@ -283,7 +345,7 @@ translations = {
         'Password': 'Password',
         'Login': 'Log in',
         'New_here': 'New here? Create an account',
-        'Footer_copyright': '&copy; 2026 EcoCode • We preserve your digital footprint 🌱',
+        'Footer_copyright': '&copy; 2026 EcoCode | NLimit • Čuvamo tvoj ekološki otisak 🌱',
         # Signup page translations
         'Signup_title': 'Signup - EcoCode',
         'Become_Eco_Hero': 'Become an Eco Hero 🌿',
@@ -297,7 +359,8 @@ translations = {
         'Phone_Number': 'Phone Number',
         'Example': 'Example:',
         'Confirm_Password': 'Confirm Password',
-        'Accept_EULA': 'I accept the Terms of Use and Privacy Policy for EcoCode.',
+        'Accept_EULA': 'I accept the <a href="/eula?from=signup" target="_blank" style="color: #10b981; text-decoration: none; font-weight: 600;">Terms of Use and Privacy Policy</a> for EcoCode.',
+        'Language_auto_detected': 'Language auto-detected based on your location',
         'Create_Account': 'Create Account',
         'Already_have_account': 'Already have an account? Log in',
         'Show': 'Show',
@@ -320,7 +383,10 @@ translations = {
         'Time': 'Time',
         'Route_History': '📑 Route History',
         'No_saved_routes': 'No saved routes yet.',
-        'Footer_simple': 'EcoCode &copy; 2026 • 🌱',
+        'Footer_simple': 'EcoCode | NLimit &copy; 2026 • Čuvamo tvoj ekološki otisak 🌱',
+        'cookie_message': 'This website uses cookies to ensure you get the best experience.',
+        'cookie_dismiss': 'Got it!',
+        'cookie_link': 'Learn more',
         # Add more as needed
     },
     'de': {
@@ -406,7 +472,27 @@ translations = {
         'Unit': 'Einheit',
         'kg_per_unit': 'kg/Einheit',
         'Save': 'Speichern',
-        'Footer': 'EcoCode &copy; 2026 • Wir bewahren deinen ökologischen Fußabdruck 🌱',
+        'Footer': 'EcoCode | NLimit &copy; 2026 • Čuvamo tvoj ekološki otisak 🌱',
+        'Home_title': 'EcoCode - Dashboard',
+        'Tap_to_unmute': 'Tippen um Ton einzuschalten',
+        'Dark_theme': 'Dunkles Thema',
+        'EULA_title': 'Nutzungsbedingungen 🌿',
+        'EULA_updated': 'Aktualisiert: 24. März 2026.',
+        'EULA_intro': 'Willkommen bei EcoCode, einem digitalen Dienst, der sich auf die Verfolgung und Analyse Ihres persönlichen CO2-Fußabdrucks spezialisiert hat. EcoCode ist ein offizielles Projekt, das innerhalb der NLimit-Plattform entwickelt wurde, die als Inkubator für innovative Softwarelösungen und digitale Nachhaltigkeit dient.',
+        'EULA_agreement': 'Durch die Nutzung der EcoCode-Anwendung auf der Domain ecocode.codes oder verwandten Diensten stimmen Sie den folgenden Bedingungen zu:',
+        'EULA_section1_title': '1. Eigentum und Lizenz',
+        'EULA_section1_content': 'EcoCode ist ein Originalwerk und geistiges Eigentum innerhalb der NLimit-Plattform. Dem Benutzer wird das Recht auf persönliche, nicht-kommerzielle Nutzung der Plattform zur Sensibilisierung für ökologische Nachhaltigkeit eingeräumt. Jeglicher Versuch eines unbefugten Zugriffs auf die Datenbank, der Modifikation des Quellcodes oder des Missbrauchs der NLimit-Technologie ist strengstens verboten.',
+        'EULA_section2_title': '2. Datenschutz und GPS-Tracking',
+        'EULA_section2_content': 'Um eine genaue Berechnung zu ermöglichen, verwendet die Anwendung die GPS-Koordinaten des Benutzers ausschließlich zur Messung der zurückgelegten Entfernung. Die NLimit-Plattform verpflichtet sich, dass Standortdaten ausschließlich für die Bedürfnisse der aktuellen Emissionsberechnungen innerhalb der Anwendung verwendet werden. Ihre Daten sind privat und werden ohne Ihre ausdrückliche Zustimmung nicht an Dritte weitergegeben.',
+        'EULA_section3_title': '3. Methodik und Daten Genauigkeit',
+        'EULA_section3_content': 'Die CO₂-Emissionsberechnungen innerhalb des EcoCode-Dienstes basieren auf allgemein akzeptierten ökologischen Koeffizienten (z. B. durchschnittliche Emissionen für Personenkraftwagen). Diese Daten dienen als informativer Anzeige und Bildungstool. NLimit garantiert keine absolute wissenschaftliche Genauigkeit und diese Daten dürfen nicht als offizielle Zertifikate in rechtlichen oder kommerziellen Angelegenheiten verwendet werden.',
+        'EULA_section4_title': '4. Benutzerkonto und Sicherheit',
+        'EULA_section4_content': 'Der Benutzer ist für die Geheimhaltung seiner Zugangsdaten verantwortlich. NLimit empfiehlt die Verwendung einzigartiger Passwörter, um die Integrität Ihres Profils und Ihrer Berechnungshistorie zu schützen.',
+        'EULA_section5_title': '5. Haftungsbeschränkung',
+        'EULA_section5_content': 'Durch die Nutzung dieses Dienstes akzeptiert der Benutzer, dass die NLimit-Plattform und ihre Autoren nicht für indirekte Schäden, Datenverlust oder technische Unterbrechungen in der Anwendung verantwortlich sind. Der Dienst wird "wie er ist" zur Förderung des ökologischen Bewusstseins bereitgestellt.',
+        'EULA_section6_title': '6. Änderungen und zukünftige Entwicklung',
+        'EULA_section6_content': 'Wir behalten uns das Recht vor, diese Bedingungen in Übereinstimmung mit dem technischen Fortschritt der Anwendung oder Änderungen in den Datenschutzvorschriften zu ändern. Da EcoCode Teil des breiteren NLimit-Ökosystems ist, werden Benutzer über alle bedeutenden Upgrades oder Integrationen neuer Tools informiert.',
+        'EULA_button': 'Ich verstehe, fortfahren',
         'Delete': 'Löschen',
         'Confirm_delete': 'Aufzeichnung löschen?',
         # Profile page translations
@@ -446,7 +532,7 @@ translations = {
         'Password': 'Passwort',
         'Login': 'Anmelden',
         'New_here': 'Neu hier? Konto erstellen',
-        'Footer_copyright': '&copy; 2026 EcoCode • Wir bewahren Ihren digitalen Fußabdruck 🌱',
+        'Footer_copyright': '&copy; 2026 EcoCode | NLimit • Čuvamo tvoj ekološki otisak 🌱',
         # Signup page translations
         'Signup_title': 'Registrieren - EcoCode',
         'Become_Eco_Hero': 'Werden Sie ein Öko-Held 🌿',
@@ -460,7 +546,8 @@ translations = {
         'Phone_Number': 'Telefonnummer',
         'Example': 'Beispiel:',
         'Confirm_Password': 'Passwort bestätigen',
-        'Accept_EULA': 'Ich akzeptiere die Nutzungsbedingungen und Datenschutzrichtlinie für EcoCode.',
+        'Accept_EULA': 'Ich akzeptiere die <a href="/eula?from=signup" target="_blank" style="color: #10b981; text-decoration: none; font-weight: 600;">Nutzungsbedingungen und Datenschutzrichtlinie</a> für EcoCode.',
+        'Language_auto_detected': 'Sprache basierend auf Ihrem Standort automatisch erkannt',
         'Create_Account': 'Konto erstellen',
         'Already_have_account': 'Bereits ein Konto? Anmelden',
         'Show': 'Anzeigen',
@@ -470,10 +557,7 @@ translations = {
 }
 
 def get_lang(request: Request) -> str:
-    lang = request.query_params.get('lang') or request.session.get('lang', 'hr')
-    if lang not in translations:
-        lang = 'hr'
-    return lang
+    return 'hr'
 
 # user type choices for UI
 USER_TYPES = [("user","User"), ("admin","Admin")]
@@ -609,8 +693,16 @@ def t(request: Request, key: str, **kwargs):
     try: return txt.format(**kwargs)
     except Exception: return txt
 
-templates = Jinja2Templates(directory="templates")
-templates.env.globals['t'] = t
+from jinja2 import FileSystemLoader, Environment
+
+env = Environment(
+    loader=FileSystemLoader("templates"),
+    cache_size=0,  # Disable caching
+    trim_blocks=True,
+    lstrip_blocks=True
+)
+env.globals['t'] = t
+templates = Jinja2Templates(env=env)
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -619,12 +711,15 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 def home(request: Request):
     show = is_session_admin(request)
     lang = get_lang(request)
-    t = translations[lang]
+    t_dict = translations.get(lang, translations['en'])
     if 'user' in request.session:
-        user = db.get_user_by_username(request.session.get('user'))
+        username = request.session.get('user')
+        user = db.get_user_by_username(username)
         u = dict(user) if user else None
-        return templates.TemplateResponse("home.html", {"request": request, "show_devtools": show, "user": u, "t": t, "lang": lang})
-    return templates.TemplateResponse("home.html", {"request": request, "show_devtools": show, "t": t, "lang": lang})
+        metrics = get_user_metrics(u)
+        session_tips = request.session.get('tips')
+        return templates.TemplateResponse("home.html", {"request": request, "show_devtools": show, "user": u, "metrics": metrics, "session_tips": session_tips, "t": t_dict, "lang": lang})
+    return templates.TemplateResponse("home.html", {"request": request, "show_devtools": show, "user": None, "metrics": {}, "t": t_dict, "lang": lang})
 
 @app.get('/set_lang')
 def set_lang(request: Request, lang: str = Query(...)):
@@ -1146,14 +1241,6 @@ REMEMBER_PERSISTS_TIMEOUT = os.environ.get('REMEMBER_PERSISTS_TIMEOUT', '0') == 
 # Password hashing
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
-# HTML templates folder
-import sys, os
-if getattr(sys, 'frozen', False):
-    _tmpl_dir = os.path.join(getattr(sys, '_MEIPASS', '.'), 'templates')
-else:
-    _tmpl_dir = 'templates'
-templates = Jinja2Templates(directory=_tmpl_dir)
-
 # Helper: check session user is admin
 def is_session_admin(request: Request) -> bool:
     try:
@@ -1200,7 +1287,10 @@ TRANSLATIONS = {
         'activity': 'Activity', 'bike': 'Bike', 'hike': 'Hike', 'walk': 'Walk', 'track_name_placeholder': 'Morning ride', 'distance': 'Distance', 'points': 'Points', 'time': 'Time', 'saved_tracks': 'Saved tracks', 'tips': 'Tips', 'clear': 'Clear',
         'tips_allow_location': 'Allow location permission and enable high accuracy for best results.', 'tips_stop_before_save': 'Stop tracking before saving to mark an end time.', 'tips_saved_private': 'Saved tracks are private to your account.',
         'no_points_to_save': 'No points to save', 'saved_track': 'Saved track', 'save_failed': 'Save failed', 'error_saving': 'Error saving:', 'cannot_load_track': 'Cannot load track:', 'no_points': 'No points',
-        'location_not_supported': 'Geolocation is not supported in this browser.', 'permission_granted_msg': 'Location permission granted. You can now Start tracking.', 'permission_denied_msg': 'Location permission denied. Please enable location access in your browser settings.', 'could_not_get_location': 'Could not get location:' , 'view': 'View'
+        'location_not_supported': 'Geolocation is not supported in this browser.', 'permission_granted_msg': 'Location permission granted. You can now Start tracking.', 'permission_denied_msg': 'Location permission denied. Please enable location access in your browser settings.', 'could_not_get_location': 'Could not get location:' , 'view': 'View',
+        'cookie_message': 'Diese Website verwendet Cookies, um Ihnen das beste Erlebnis zu bieten.',
+        'cookie_dismiss': 'Verstanden!',
+        'cookie_link': 'Mehr erfahren'
     },
     'hr': {
         'home': 'Početna', 'track': 'Praćenje', 'insights': 'Uvidi', 'daily_co2': 'Dnevni CO₂', 'eco_score': 'Eko rezultat', 'gps_tracking': 'GPS praćenje',
@@ -1617,17 +1707,19 @@ async def enforce_session_timeout(request: Request, call_next):
 # -----------------------------
 # We now use the centralized Database in `database.py` (db) for all user storage.
 
-@app.get("/", response_class=HTMLResponse)
-def home(request: Request):
+def home_duplicate(request: Request):
+    # This is a duplicate route - the actual home route is earlier in the file
     show = is_session_admin(request)
+    lang = get_lang(request)
+    t_dict = translations.get(lang, translations['en'])
     if 'user' in request.session:
         username = request.session.get('user')
         user = db.get_user_by_username(username)
         u = dict(user) if user else None
         metrics = get_user_metrics(u)
         session_tips = request.session.get('tips')
-        return templates.TemplateResponse("home.html", {"request": request, "show_devtools": show, "user": u, "metrics": metrics, "session_tips": session_tips})
-    return templates.TemplateResponse("home.html", {"request": request, "show_devtools": show, "user": None, "metrics": {}})
+        return templates.TemplateResponse("home.html", {"request": request, "show_devtools": show, "user": u, "metrics": metrics, "session_tips": session_tips, "t": t_dict, "lang": lang})
+    return templates.TemplateResponse("home.html", {"request": request, "show_devtools": show, "user": None, "metrics": {}, "t": t_dict, "lang": lang})
 
 
 @app.get("/devtools", response_class=HTMLResponse)
@@ -1647,10 +1739,10 @@ def devtools_page(request: Request):
 @app.get("/signup", response_class=HTMLResponse)
 def signup_page(request: Request):
     lang = get_lang(request)
-    t = translations[lang]
+    t_dict = translations.get(lang, translations['en'])
     ex = example_for_country('HR')
     examples_map = {code: example_for_country(code)['display'] for code, _ in COUNTRY_CHOICES}
-    return templates.TemplateResponse("signup.html", {"request": request, "countries": COUNTRY_CHOICES, "selected_country": 'HR', "phone_example": ex, "examples_map": examples_map, "name": '', "phone": '', "username": '', "t": t, "lang": lang})
+    return templates.TemplateResponse("signup.html", {"request": request, "countries": COUNTRY_CHOICES, "selected_country": 'HR', "phone_example": ex, "examples_map": examples_map, "name": '', "phone": '', "username": '', "t": t_dict, "lang": lang})
 
 
 @app.post("/signup")
@@ -1727,14 +1819,17 @@ def signup(request: Request, name: str = Form(...),
 @app.get("/eula.html", response_class=HTMLResponse)
 def eula_page(request: Request):
     """Render the EULA page (accessible at /eula and /eula.html)."""
-    return templates.TemplateResponse("eula.html", {"request": request})
+    lang = get_lang(request)
+    t_dict = translations.get(lang, translations['en'])
+    show = is_session_admin(request)
+    return templates.TemplateResponse("eula.html", {"request": request, "t": t_dict, "lang": lang, "show_devtools": show})
 
 
 @app.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
     lang = get_lang(request)
-    t = translations[lang]
-    return templates.TemplateResponse("login.html", {"request": request, "t": t, "lang": lang})
+    t_dict = translations.get(lang, translations['en'])
+    return templates.TemplateResponse("login.html", {"request": request, "t": t_dict, "lang": lang})
 
 
 @app.post("/login")
@@ -2908,3 +3003,4 @@ def api_admin_delete_activity(request: Request, activity_id: int):
         return {"ok": True}
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
+

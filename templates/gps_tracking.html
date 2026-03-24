@@ -7,6 +7,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
     
     <style>
         :root {
@@ -164,13 +165,13 @@
     <nav id="topbar">
         <a href="/" class="logo"><img src="/static/logo.png" alt="EcoCode" class="logo-box"> EcoCode</a>
         <div class="nav-links">
-            <a href="/">Početna</a> 
-            <a href="/insights/gps">GPS</a> 
-            <a href="/track">Dnevnik</a> 
-            <a href="/eco-score?range=week">Analiza</a>
+            <a href="/">{{ t.Home }}</a> 
+            <a href="/insights/gps">{{ t.GPS }}</a> 
+            <a href="/track">{{ t.Track }}</a> 
+            <a href="/eco-score?range=week">{{ t.Analysis }}</a>
             
             {% if show_devtools %}
-                <a href="/devtools" class="btn-admin">Admin Alati</a>
+                <a href="/devtools" class="btn-admin">{{ t.Admin_Tools }}</a>
             {% endif %}
 
             {% if user %}
@@ -236,7 +237,7 @@
         </aside>
     </main>
 
-    <footer>EcoCode &copy; 2026 • 🌱</footer>
+    <footer>{{ t.Footer }}</footer>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
@@ -269,6 +270,34 @@
             document.getElementById('stopBtn').disabled = true;
             document.getElementById('saveBtn').disabled = false;
         };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
+    <script>
+        // Cookie consent
+        window.cookieTranslations = {
+          message: "{{ t.cookie_message }}",
+          dismiss: "{{ t.cookie_dismiss }}",
+          link: "{{ t.cookie_link }}"
+        };
+        window.addEventListener("load", function(){
+          window.cookieconsent.initialise({
+            "palette": {
+              "popup": {
+                "background": "#000"
+              },
+              "button": {
+                "background": "#10b981"
+              }
+            },
+            "theme": "classic",
+            "content": {
+              "message": window.cookieTranslations.message,
+              "dismiss": window.cookieTranslations.dismiss,
+              "link": window.cookieTranslations.link,
+              "href": "/eula"
+            }
+          });
+        });
     </script>
 </body>
 </html>

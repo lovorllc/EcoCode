@@ -1,10 +1,11 @@
 <!doctype html>
-<html lang="hr">
+<html lang="{{ lang }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoCode - Nadzorna ploča</title>
+    <title>{{ t.Home_title }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
     <style>
         :root {
             --bg: #f8fafc;
@@ -141,11 +142,12 @@
 </head>
 <body>
 
-    <!-- Startup Video -->
-    <video id="startupVideo" volume="1" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; object-fit: cover; opacity: 0; transition: opacity 1s ease; display: none;">
+    <!-- Startup Video (audio track included inside MP4) -->
+    <video id="startupVideo" autoplay muted playsinline style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; object-fit: cover; opacity: 0; transition: opacity 1s ease; display: none;">
         <source src="/static/appstarting.mp4" type="video/mp4">
         Your browser does not support the video tag.
     </video>
+    <div id="mediaHint" style="position: fixed; top: 16px; left: 16px; z-index: 10000; color: #fff; background: rgba(0,0,0,0.6); border-radius: 12px; padding: 8px 12px; font-weight: 700; display: none;">{{ t.Tap_to_unmute }}</div>
 
     <nav id="topbar">
         <a href="/" class="logo"><img src="/static/logo.png" alt="{{ t.EcoCode }}" class="logo-box"> {{ t.EcoCode }}</a>
@@ -162,8 +164,8 @@
             {% if user %}
                 <a href="/profile" class="btn-primary">{{ t.Profile }}</a>
             {% else %}
-                <a href="/login">{{ t.Login }}</a>
-                <a href="/signup" class="btn-primary">{{ t.Signup }}</a>
+                <a href="/login?lang={{ lang }}">{{ t.Login }}</a>
+                <a href="/signup?lang={{ lang }}" class="btn-primary">{{ t.Signup }}</a>
             {% endif %}
         </div>
     </nav>
@@ -212,43 +214,104 @@
                     <p style="color: var(--text-soft); margin: 20px auto 40px; font-size: 1.1rem;">
                         {{ t.Join_community }}
                     </p>
-                    <a href="/signup" class="btn-primary" style="display: inline-block; padding: 15px 40px; font-size: 1.1rem;">{{ t.Start_free }}</a>
+                    <a href="/signup?lang={{ lang }}" class="btn-primary" style="display: inline-block; padding: 15px 40px; font-size: 1.1rem;">{{ t.Start_free }}</a>
                 </div>
             </div>
 
             <div class="theme-toggle" id="themeToggle">
                 <span id="themeIcon">🌙</span>
-                <span id="themeLabel">Tamna tema</span>
+                <span id="themeLabel">{{ t.Dark_theme }}</span>
             </div>
         {% endif %}
     </main>
 
-    <footer>EcoCode &copy; 2026 • 🌱</footer>
+    <footer>{{ t.Footer }}</footer>
 
     <script>
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
 
-        // Startup video logic
+        // Auto-detect language based on geolocation
+        (function() {
+          const urlParams = new URLSearchParams(window.location.search);
+          if (!urlParams.has('lang')) {
+            fetch('https://ipapi.co/json/')
+              .then(response => response.json())
+              .then(data => {
+                const countryCode = data.country_code;
+                let lang = 'hr'; // default
+                if (countryCode === 'HR') lang = 'hr';
+                else if (countryCode === 'DE') lang = 'de';
+                else lang = 'en';
+                document.cookie = "lang=" + lang + "; path=/; max-age=31536000";
+                document.documentElement.lang = lang;
+                if (lang !== 'hr') {
+                  window.location.href = window.location.pathname + '?lang=' + lang;
+                }
+              })
+              .catch(() => {
+                document.cookie = "lang=hr; path=/; max-age=31536000";
+                document.documentElement.lang = 'hr';
+              });
+          }
+        })();
+
+        // Startup video logic (audio is in the MP4 file)
         const startupVideo = document.getElementById('startupVideo');
+
+        function hideStartupMedia() {
+            if (startupVideo) {
+                startupVideo.style.opacity = '0';
+            }
+            setTimeout(() => {
+                if (startupVideo) {
+                    startupVideo.style.display = 'none';
+                    startupVideo.pause();
+                    startupVideo.currentTime = 0;
+                }
+                sessionStorage.setItem('hasSeenStartup', 'true');
+            }, 500);
+        }
+
+        const mediaHint = document.getElementById('mediaHint');
+
         if (startupVideo && !sessionStorage.getItem('hasSeenStartup')) {
             startupVideo.style.display = 'block';
             startupVideo.style.opacity = '1';
-            startupVideo.play();
+
+            const videoPlayPromise = startupVideo.play();
+            if (videoPlayPromise && videoPlayPromise.catch) {
+                videoPlayPromise.catch((error) => {
+                    console.warn('Startup video autoplay blocked or failed:', error);
+                    hideStartupMedia();
+                });
+            }
+
+            // allow users to unmute on interaction (autoplay policy)
+            const unmuteOnce = () => {
+                if (startupVideo) {
+                    startupVideo.muted = false;
+                }
+                if (mediaHint) {
+                    mediaHint.style.display = 'none';
+                }
+            };
+
+            if (mediaHint) {
+                mediaHint.style.display = 'block';
+            }
+            document.addEventListener('click', unmuteOnce, { once: true });
+            document.addEventListener('keydown', unmuteOnce, { once: true });
 
             startupVideo.addEventListener('loadedmetadata', () => {
                 const duration = startupVideo.duration;
                 if (duration > 1.5) {
-                    setTimeout(() => {
-                        startupVideo.style.opacity = '0';
-                    }, (duration - 1.5) * 1000);
+                    setTimeout(hideStartupMedia, (duration - 1.5) * 1000);
                 }
             });
 
-            startupVideo.addEventListener('ended', () => {
-                startupVideo.style.display = 'none';
-                sessionStorage.setItem('hasSeenStartup', 'true');
-            });
+            startupVideo.addEventListener('ended', hideStartupMedia);
+            startupVideo.addEventListener('error', hideStartupMedia);
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -277,6 +340,33 @@
         }
         window.onload = syncData;
         {% endif %}
+
+        // Cookie consent
+        window.cookieTranslations = {
+          message: "{{ t.cookie_message }}",
+          dismiss: "{{ t.cookie_dismiss }}",
+          link: "{{ t.cookie_link }}"
+        };
+        window.addEventListener("load", function(){
+          window.cookieconsent.initialise({
+            "palette": {
+              "popup": {
+                "background": "#000"
+              },
+              "button": {
+                "background": "#10b981"
+              }
+            },
+            "theme": "classic",
+            "content": {
+              "message": window.cookieTranslations.message,
+              "dismiss": window.cookieTranslations.dismiss,
+              "link": window.cookieTranslations.link,
+              "href": "/eula"
+            }
+          });
+        });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
 </body>
 </html>

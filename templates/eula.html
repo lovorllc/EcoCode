@@ -1,10 +1,11 @@
 <!doctype html>
-<html lang="hr">
+<html lang="{{ lang }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoCode - Uvjeti korištenja (EULA)</title>
+    <title>{{ t.EULA_title }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
     <style>
         :root {
             /* SVJETLA ECO TEMA */
@@ -156,47 +157,52 @@
     <nav id="topbar">
         <a href="/" class="logo"><img src="/static/logo.png" alt="EcoCode" class="logo-box"> EcoCode</a>
         <div class="nav-links">
-            <a href="/">Početna</a> 
-            <a href="/insights/gps">GPS</a> 
-            <a href="/track">Dnevnik</a> 
-            <a href="/eco-score?range=week">Analiza</a>
+            <a href="/">{{ t.Home }}</a> 
+            <a href="/insights/gps">{{ t.GPS }}</a> 
+            <a href="/track">{{ t.Track }}</a> 
+            <a href="/eco-score?range=week">{{ t.Analysis }}</a>
             
             {% if show_devtools %}
-                <a href="/devtools" class="btn-admin">Admin Alati</a>
+                <a href="/devtools" class="btn-admin">{{ t.Admin_Tools }}</a>
             {% endif %}
 
             {% if user %}
-                <a href="/profile" class="btn-primary">Profil</a>
+                <a href="/profile" class="btn-primary">{{ t.Profile }}</a>
             {% else %}
-                <a href="/login">Prijava</a>
-                <a href="/signup" class="btn-primary">Registracija</a>
+                <a href="/login" id="login-btn">{{ t.Login }}</a>
+                <a href="/signup" class="btn-primary" id="signup-btn">{{ t.Signup }}</a>
             {% endif %}
         </div>
     </nav>
 
     <main>
         <div class="eula-card">
-            <h1>Uvjeti korištenja 🌿</h1>
-            <span class="last-updated">Ažurirano: 28. siječnja 2026.</span>
+            <h1>{{ t.EULA_title }}</h1>
+            <span class="last-updated">{{ t.EULA_updated }}</span>
 
-            <p>Dobrodošli u <strong>EcoCode</strong>. Naš cilj je pomoći vam u osvještavanju i smanjenju ugljičnog otiska. Korištenjem ove aplikacije pristajete na sljedeće uvjete:</p>
+            <p>{{ t.EULA_intro }}</p>
 
-            <h3>1. Licenca i korištenje</h3>
-            <p>EcoCode vam pruža pravo na korištenje platforme u svrhe praćenja osobne ekološke održivosti. Bilo kakav pokušaj neovlaštenog pristupa bazi podataka ili modifikacija koda strogo je zabranjen.</p>
+            <p>{{ t.EULA_agreement }}</p>
 
-            <h3>2. Privatnost i GPS praćenje</h3>
-            <p>Funkcija praćenja koristi <strong>GPS koordinate</strong> kako bi precizno izračunala prijeđenu udaljenost. Vaši podaci o lokaciji koriste se isključivo za potrebe izračuna emisija i nisu dostupni trećim stranama bez vaše izričite privole.</p>
+            <h3>{{ t.EULA_section1_title }}</h3>
+            <p>{{ t.EULA_section1_content }}</p>
 
-            <h3>3. Metodologija izračuna</h3>
-            <p>Izračuni emisija CO₂ temelje se na standardnim faktorima (npr. prosjek za putnička vozila). Ovi podaci služe kao <strong>informativni prikaz</strong> i ne mogu se koristiti kao službeni certifikati u pravnim ili komercijalnim poslovima.</p>
+            <h3>{{ t.EULA_section2_title }}</h3>
+            <p>{{ t.EULA_section2_content }}</p>
 
-            <h3>4. Korisnički račun</h3>
-            <p>Odgovorni ste za čuvanje tajnosti svoje lozinke. EcoCode preporučuje redovitu promjenu pristupnih podataka i korištenje jedinstvenih lozinki.</p>
+            <h3>{{ t.EULA_section3_title }}</h3>
+            <p>{{ t.EULA_section3_content }}</p>
 
-            <h3>5. Izmjene uvjeta</h3>
-            <p>Zadržavamo pravo izmjene ovih uvjeta u skladu s novim funkcijama aplikacije ili promjenama u regulativama o zaštiti podataka. O svim većim promjenama bit ćete obaviješteni putem aplikacije.</p>
+            <h3>{{ t.EULA_section4_title }}</h3>
+            <p>{{ t.EULA_section4_content }}</p>
 
-            <a href="/signup" class="btn-back">Razumijem, nastavi</a>
+            <h3>{{ t.EULA_section5_title }}</h3>
+            <p>{{ t.EULA_section5_content }}</p>
+
+            <h3>{{ t.EULA_section6_title }}</h3>
+            <p>{{ t.EULA_section6_content }}</p>
+
+            <a href="/signup" class="btn-back">{{ t.EULA_button }}</a>
         </div>
     </main>
 
@@ -207,6 +213,42 @@
     <script>
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
+
+        // Hide login/signup buttons when NOT coming from signup page
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('from') !== 'signup') {
+          const loginBtn = document.getElementById('login-btn');
+          const signupBtn = document.getElementById('signup-btn');
+          if (loginBtn) loginBtn.style.display = 'none';
+          if (signupBtn) signupBtn.style.display = 'none';
+        }
+
+        // Cookie consent
+        window.cookieTranslations = {
+          message: "{{ t.cookie_message }}",
+          dismiss: "{{ t.cookie_dismiss }}",
+          link: "{{ t.cookie_link }}"
+        };
+        window.addEventListener("load", function(){
+          window.cookieconsent.initialise({
+            "palette": {
+              "popup": {
+                "background": "#000"
+              },
+              "button": {
+                "background": "#10b981"
+              }
+            },
+            "theme": "classic",
+            "content": {
+              "message": window.cookieTranslations.message,
+              "dismiss": window.cookieTranslations.dismiss,
+              "link": window.cookieTranslations.link,
+              "href": "/eula"
+            }
+          });
+        });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
 </body>
 </html>

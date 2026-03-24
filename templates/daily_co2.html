@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EcoCode - {{ t.CO2_Insights }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
     <style>
         :root {
             /* SVJETLA ECO TEMA */
@@ -249,6 +250,34 @@
                     }
                 }
             }
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
+    <script>
+        // Cookie consent
+        window.cookieTranslations = {
+          message: "{{ t.cookie_message }}",
+          dismiss: "{{ t.cookie_dismiss }}",
+          link: "{{ t.cookie_link }}"
+        };
+        window.addEventListener("load", function(){
+          window.cookieconsent.initialise({
+            "palette": {
+              "popup": {
+                "background": "#000"
+              },
+              "button": {
+                "background": "#10b981"
+              }
+            },
+            "theme": "classic",
+            "content": {
+              "message": window.cookieTranslations.message,
+              "dismiss": window.cookieTranslations.dismiss,
+              "link": window.cookieTranslations.link,
+              "href": "/eula"
+            }
+          });
         });
     </script>
 </body>
