@@ -33,6 +33,18 @@
             --input-bg: rgba(0, 0, 0, 0.2);
         }
 
+        [data-theme="neon"] {
+            --bg: #0f172a;
+            --accent: #0fea88;
+            --accent-dark: #0fa060;
+            --card-bg: rgba(15, 23, 42, 0.6);
+            --text-main: #e2e8f0;
+            --text-soft: #cbd5e1;
+            --glass-border: rgba(15, 234, 136, 0.25);
+            --shadow: 0 0 10px rgba(15, 234, 136, 0.15), inset 0 1px 0 rgba(15, 234, 136, 0.1);
+            --input-bg: rgba(0, 0, 0, 0.2);
+        }
+
         * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 
         body {
@@ -227,9 +239,53 @@
             .signup-card { padding: 2rem 1.5rem; border-radius: 20px; margin: 10px; }
             h1 { font-size: 2rem; }
         }
+        /* MOBILE INTERFACE */
+        @media (max-width: 768px) {
+            #topbar {
+                padding: 0 3%;
+                height: 56px;
+            }
+
+            .logo { font-size: 1.1rem; }
+            .logo-box { width: 50px; height: 50px; min-width: 50px; min-height: 50px; margin-top: -5px; }
+            .nav-links { gap: 5px; }
+            .nav-links a { font-size: 0.75rem; padding: 6px 10px; }
+            .btn-primary { padding: 8px 16px; font-size: 0.8rem; }
+            main { padding: 1rem; }
+            .card { border-radius: 16px; padding: 1rem; }
+            h1 { font-size: 1.5rem; }
+            input, button { font-size: 16px !important; padding: 12px !important; min-height: 44px; }
+        }
+
+        @media (max-width: 480px) {
+            .logo { font-size: 1rem; }
+            .logo-box { width: 40px; height: 40px; min-width: 40px; }
+            .nav-links a { font-size: 0.65rem; padding: 5px 8px; display: none; }
+            .nav-links a.btn-primary, .nav-links a:first-child { display: inline-block; }
+            main { padding: 0.5rem; }
+        }
     </style>
 </head>
 <body>
+    <script>
+        function detectDevice() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isSmallScreen = window.innerWidth <= 768;
+            return isMobile || isSmallScreen;
+        }
+        function initMobileInterface() {
+            if (detectDevice()) {
+                document.body.classList.add('mobile-device');
+                document.documentElement.setAttribute('data-device', 'mobile');
+            } else {
+                document.body.classList.add('desktop-device');
+                document.documentElement.setAttribute('data-device', 'desktop');
+            }
+        }
+        window.addEventListener('load', initMobileInterface);
+        window.addEventListener('resize', initMobileInterface);
+        initMobileInterface();
+    </script>
 
     <nav id="topbar">
         <a href="/" class="logo"><img src="/static/logo.png" alt="EcoCode" class="logo-box"> EcoCode</a>

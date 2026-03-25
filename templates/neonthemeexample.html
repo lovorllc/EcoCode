@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ t.Home_title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
+    <style>
+        :root {
+            /* Sophisticated Dark Green Palette */
+            --bg: #0b0f1a; 
+            --accent: #10b981; /* Standard Eco Green */
+            --accent-bright: #34d399; /* The "Neon" touch */
+            --secondary: #3b82f6;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --text-main: #f8fafc;
+            --text-soft: #94a3b8;
+            --glass-border: rgba(16, 185, 129, 0.3);
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            --gold: #fbbf24;
+        }
+
+        * { box-sizing: border-box; transition: all 0.2s ease; }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            margin: 0; 
+            background-color: var(--bg);
+            /* Soft gradient instead of a grid */
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* --- TOPBAR --- */
+        #topbar {
+            background: rgba(11, 15, 26, 0.8);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 4%;
+            height: 66px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            font-weight: 800; font-size: 1.3rem; color: var(--text-main);
+            text-decoration: none; display: flex; align-items: center; gap: 10px;
+        }
+        .logo-box { width: 40px; height: 40px; border-radius: 8px; }
+
+        .nav-links { display: flex; gap: 8px; align-items: center; }
+        .nav-links a { 
+            text-decoration: none; color: var(--text-soft); font-weight: 600; 
+            font-size: 0.85rem; padding: 8px 14px; border-radius: 10px;
+        }
+        .nav-links a:hover { color: var(--accent-bright); background: rgba(255,255,255,0.05); }
+        
+        .btn-primary { 
+            background: var(--accent); color: white !important; 
+            padding: 10px 22px; border-radius: 12px; 
+            font-weight: 700 !important; text-decoration: none; 
+            box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.3);
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
+
+        /* --- LAYOUT --- */
+        main { max-width: 1100px; margin: 0 auto; width: 100%; padding: 2rem 5% 80px; }
+        .hero { padding: 30px 0; }
+        .welcome-msg { font-size: 2.4rem; font-weight: 800; margin: 0; color: #fff; }
+
+        .glass-panel { 
+            background: var(--card-bg); backdrop-filter: blur(10px);
+            padding: 2rem; border-radius: 24px; border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow);
+        }
+
+        .main-grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 24px; }
+        @media (max-width: 950px) { .main-grid { grid-template-columns: 1fr; } }
+
+        .stat-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+        @media (max-width: 600px) { .stat-group { grid-template-columns: 1fr; } }
+
+        .stat-card { 
+            background: rgba(255,255,255,0.02); padding: 1.5rem; border-radius: 20px; 
+            text-align: center; border: 1px solid rgba(255,255,255,0.05); 
+        }
+        .stat-label { font-size: 0.7rem; color: var(--text-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+        .stat-val { font-size: 1.6rem; font-weight: 800; color: var(--accent-bright); margin-top: 4px; }
+
+        .chart-container { 
+            display: flex; align-items: flex-end; gap: 10px; height: 200px; 
+            padding: 15px; background: rgba(0,0,0,0.2); border-radius: 16px; 
+        }
+        .bar { 
+            background: linear-gradient(to top, var(--accent), var(--accent-bright)); 
+            width: 100%; border-radius: 6px 6px 2px 2px; opacity: 0.8;
+        }
+        .bar:hover { opacity: 1; filter: brightness(1.2); }
+
+        .streak-card { 
+            background: linear-gradient(135deg, #064e3b 0%, #022c22 100%); 
+            color: white; text-align: center; border: 1px solid var(--accent);
+        }
+        .streak-badge { font-size: 3rem; display: block; margin: 5px 0; font-weight: 800; }
+
+        .theme-toggle {
+            position: fixed; bottom: 30px; right: 30px;
+            background: rgba(255,255,255,0.05); backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border); padding: 10px 18px;
+            border-radius: 14px; cursor: pointer; color: var(--text-main); font-size: 0.8rem;
+        }
+
+        footer { padding: 4rem 2rem; text-align: center; font-size: 0.85rem; color: var(--text-soft); }
+    </style>
+</head>
+<body>
+
+    <nav id="topbar">
+        <a href="/" class="logo">
+            <div style="background: var(--accent); width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center;">🌱</div>
+            {{ t.EcoCode }}
+        </a>
+        <div class="nav-links">
+            <a href="/">{{ t.Home }}</a> 
+            <a href="/insights/gps">{{ t.GPS }}</a> 
+            <a href="/track">{{ t.Track }}</a> 
+            {% if user %}
+                <a href="/profile" class="btn-primary">{{ t.Profile }}</a>
+            {% else %}
+                <a href="/signup" class="btn-primary">{{ t.Signup }}</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main>
+        {% if user %}
+            <div class="hero">
+                <h1 class="welcome-msg">{{ t.Welcome_back }}, {{ user.username }}</h1>
+                <p style="color: var(--text-soft); margin-top: 8px;">{{ t.Your_effort_matters }}</p>
+            </div>
+
+            <div class="main-grid">
+                <div class="content-area">
+                    <section class="stat-group">
+                        <div class="stat-card">
+                            <span class="stat-label">{{ t.Emission }}</span>
+                            <div class="stat-val" style="color: #f87171;">0.00<small>kg</small></div>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">{{ t.Savings }}</span>
+                            <div class="stat-val">0.00<small>kg</small></div>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">{{ t.Eco_Score }}</span>
+                            <div class="stat-val" style="color: var(--gold);">0</div>
+                        </div>
+                    </section>
+                    
+                    <div class="glass-panel">
+                        <h3 style="margin:0 0 20px 0; font-size: 1.1rem; color: var(--text-main);">{{ t.Weekly_Activity }}</h3>
+                        <div class="chart-container">
+                            <div class="bar" style="height: 40%;"></div>
+                            <div class="bar" style="height: 70%;"></div>
+                            <div class="bar" style="height: 55%;"></div>
+                            <div class="bar" style="height: 90%;"></div>
+                            <div class="bar" style="height: 30%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-area">
+                    <div class="glass-panel streak-card">
+                        <span class="streak-badge">🔥 0</span>
+                        <p style="opacity: 0.8; font-size: 0.9rem;">{{ t.Days_of_eco_consciousness }}</p>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 80px 0;">
+                <h1 class="welcome-msg" style="font-size: 3.5rem;">{{ t.Welcome }}</h1>
+                <p style="color: var(--text-soft); max-width: 500px; margin: 20px auto 40px;">{{ t.Join_community }}</p>
+                <a href="/signup" class="btn-primary" style="padding: 16px 40px;">{{ t.Start_free }}</a>
+            </div>
+        {% endif %}
+    </main>
+
+    <footer>{{ t.Footer }}</footer>
+
+    <script>
+        // Simple theme toggle (Dark by default)
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+
+        document.getElementById('themeToggle')?.addEventListener('click', () => {
+            const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        });
+    </script>
+</body>
+</html>
