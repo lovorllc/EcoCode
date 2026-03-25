@@ -20,4 +20,4 @@ except Exception as e:
 
 if __name__ == '__main__':
     # Bind to all interfaces on port 8000 for LAN access
-    uvicorn.run(app, host='0.0.0.0', port=8000, log_level='info', reload=False)
+    uvicorn.run(app, host='0.0.0.0', port=8000, log_level='info', reload=False, proxy_headers=True, forwarded_allow_ips='*')

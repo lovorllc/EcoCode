@@ -31,11 +31,19 @@ except Exception as e:
 if __name__ == '__main__':
     # Force host/port per project requirement: always bind 0.0.0.0:8000
     host = '0.0.0.0'
-    port = 800
+    port = 8000
     print(f"Starting server at http://{host}:{port} (Ctrl+C to stop)")
     # Use reload=False in frozen bundles; uvicorn reload uses file watching unavailable in exe
     try:
-        uvicorn.run(app, host=host, port=port, log_level='info', reload=False)
+        uvicorn.run(
+            app,
+            host=host,
+            port=port,
+            log_level='info',
+            reload=False,
+            proxy_headers=True,
+            forwarded_allow_ips='*'
+        )
     except Exception as e:
         print("Uvicorn failed to start. Ensure dependencies are installed and the port is free.")
         print("Exception:", e)
