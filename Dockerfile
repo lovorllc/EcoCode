@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -10,7 +10,7 @@ COPY requirements.txt /app/
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends build-essential gcc libffi-dev libssl-dev \
 	&& rm -rf /var/lib/apt/lists/* \
-	&& pip install --upgrade pip \
+	&& pip install --upgrade pip==26.0.1 \
 	&& pip install --no-cache-dir -r requirements.txt
 
 # Copy project

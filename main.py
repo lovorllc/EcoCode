@@ -718,8 +718,25 @@ def home(request: Request):
         u = dict(user) if user else None
         metrics = get_user_metrics(u)
         session_tips = request.session.get('tips')
-        return templates.TemplateResponse("home.html", {"request": request, "show_devtools": show, "user": u, "metrics": metrics, "session_tips": session_tips, "t": t_dict, "lang": lang})
-    return templates.TemplateResponse("home.html", {"request": request, "show_devtools": show, "user": None, "metrics": {}, "t": t_dict, "lang": lang})
+        context = {
+            "request": request,
+            "show_devtools": show,
+            "user": u,
+            "metrics": metrics,
+            "session_tips": session_tips,
+            "t": t_dict,
+            "lang": lang
+        }
+        return templates.TemplateResponse("home.html", context)
+    context = {
+        "request": request,
+        "show_devtools": show,
+        "user": None,
+        "metrics": {},
+        "t": t_dict,
+        "lang": lang
+    }
+    return templates.TemplateResponse("home.html", context)
 
 @app.get('/set_lang')
 def set_lang(request: Request, lang: str = Query(...)):
