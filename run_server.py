@@ -29,9 +29,9 @@ except Exception as e:
     sys.exit(1)
 
 if __name__ == '__main__':
-    # Force host/port per project requirement: always bind 0.0.0.0:8000
-    host = '0.0.0.0'
-    port = 8000
+    # Force host/port per project requirement: always bind 127.0.0.1:8000
+    host = '127.0.0.1'
+    port = 800
     print(f"Starting server at http://{host}:{port} (Ctrl+C to stop)")
     # Use reload=False in frozen bundles; uvicorn reload uses file watching unavailable in exe
     try:
