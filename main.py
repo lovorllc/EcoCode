@@ -5,6 +5,7 @@ from jinja2 import FileSystemLoader, Environment
 import os
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
+from contextlib import asynccontextmanager
 import sqlite3
 from passlib.context import CryptContext
 from database import Database
@@ -562,7 +563,14 @@ def get_lang(request: Request) -> str:
 # user type choices for UI
 USER_TYPES = [("user","User"), ("admin","Admin")]
 
-app = FastAPI()
+# Lifespan context manager for startup/shutdown events
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup logic
+    yield
+    # Shutdown logic (if needed)
+
+app = FastAPI(lifespan=lifespan)
 from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(
     CORSMiddleware,
@@ -579,7 +587,6 @@ app.include_router(auth_router, prefix="/auth", tags=["auth"])
 
 
 # Ensure a permanent admin account exists (username 'admin', password 'admin')
-@app.on_event("startup")
 def ensure_permanent_admin():
     try:
         existing = db.get_user_by_username('admin')
@@ -599,6 +606,9 @@ def ensure_permanent_admin():
                     conn.commit()
             except Exception: pass
     except Exception: pass
+
+# Call admin setup during app startup
+ensure_permanent_admin()
 
 # --- TRANSLATIONS (Updated for "GPS") ---
 TRANSLATIONS = {
