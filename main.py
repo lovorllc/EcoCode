@@ -737,7 +737,7 @@ def home(request: Request):
             "t": t_dict,
             "lang": lang
         }
-        return templates.TemplateResponse("home.html", context)
+        return templates.TemplateResponse(request=request, name="home.html", context=context)
     context = {
         "request": request,
         "show_devtools": show,
@@ -746,7 +746,7 @@ def home(request: Request):
         "t": t_dict,
         "lang": lang
     }
-    return templates.TemplateResponse("home.html", context)
+    return templates.TemplateResponse(request=request, name="home.html", context=context)
 
 @app.get('/set_lang')
 def set_lang(request: Request, lang: str = Query(...)):
@@ -761,7 +761,7 @@ def gps_tracking_page(request: Request):
     try: tracks = [dict(r) for r in db.get_tracks_for_user(u.get('id'))]
     except Exception: tracks = []
     show_devtools = is_session_admin(request)
-    return templates.TemplateResponse('gps_tracking.html', {'request': request, 'user': u, 'tracks': tracks, 'show_devtools': show_devtools})
+    return templates.TemplateResponse(request=request, name='gps_tracking.html', context={'request': request, 'user': u, 'tracks': tracks, 'show_devtools': show_devtools})
 
 # (Ovdje bi išli svi ostali API i Page handler rute koje si dostavio u originalu...)
 # S obzirom na limit poruke, zadržao sam strukturu i ključne GPS promjene.
@@ -807,7 +807,7 @@ def users_page(request: Request, msg: str = None):
     except Exception as e:
         # If DB fails, show a helpful error page rather than raw 'None'
         show_devtools = is_session_admin(request)
-        return templates.TemplateResponse("users.html", {"request": request, "users": [], "msg": None, "error": f"Database error: {e}", "show_devtools": show_devtools})
+        return templates.TemplateResponse(request=request, name="users.html", context={"request": request, "users": [], "msg": None, "error": f"Database error: {e}", "show_devtools": show_devtools})
 
     # convert sqlite Row objects to plain dicts so templates render reliably
     users = []
@@ -835,7 +835,7 @@ def users_page(request: Request, msg: str = None):
     users = [u for u in users if u.get('id')]
 
     show_devtools = is_session_admin(request)
-    return templates.TemplateResponse("users.html", {"request": request, "users": users, "msg": msg, "show_devtools": show_devtools})
+    return templates.TemplateResponse(request=request, name="users.html", context={"request": request, "users": users, "msg": msg, "show_devtools": show_devtools})
 
 
 @app.get('/api/users')
@@ -1004,7 +1004,7 @@ def new_user_page(request: Request):
 
     ex = example_for_country('HR')
     examples_map = {code: example_for_country(code)['display'] for code, _ in COUNTRY_CHOICES}
-    return templates.TemplateResponse('user_form.html', {"request": request, "user": None, "action": "/users/new", "countries": COUNTRY_CHOICES, "selected_country": 'HR', "phone_example": ex, "examples_map": examples_map, "user_types": USER_TYPES, "selected_user_type": 'user', "current_is_admin": is_session_admin(request)})
+    return templates.TemplateResponse(request=request, name='user_form.html', context={"request": request, "user": None, "action": "/users/new", "countries": COUNTRY_CHOICES, "selected_country": 'HR', "phone_example": ex, "examples_map": examples_map, "user_types": USER_TYPES, "selected_user_type": 'user', "current_is_admin": is_session_admin(request)})
 
 
 @app.post('/users/new')
@@ -1058,7 +1058,7 @@ def create_user_form(request: Request, name: str = Form(None), phone: str = Form
     except Exception as e:
         ex = example_for_country(country)
         examples_map = {code: example_for_country(code)['display'] for code, _ in COUNTRY_CHOICES}
-        return templates.TemplateResponse('user_form.html', {"request": request, "user": {"name": name, "phone": phone, "username": username, "email": email, "user_type": user_type, "permanent": (1 if permanent == '1' else 0)}, "error": str(e), "action": "/users/new", "countries": COUNTRY_CHOICES, "selected_country": country, "phone_example": ex, "examples_map": examples_map, "user_types": USER_TYPES, "selected_user_type": user_type, "current_is_admin": is_session_admin(request)})
+        return templates.TemplateResponse(request=request, name='user_form.html', context={"request": request, "user": {"name": name, "phone": phone, "username": username, "email": email, "user_type": user_type, "permanent": (1 if permanent == '1' else 0)}, "error": str(e), "action": "/users/new", "countries": COUNTRY_CHOICES, "selected_country": country, "phone_example": ex, "examples_map": examples_map, "user_types": USER_TYPES, "selected_user_type": user_type, "current_is_admin": is_session_admin(request)})
 
 
 @app.get('/users/{user_id}/edit')
@@ -1074,7 +1074,7 @@ def edit_user_page(request: Request, user_id: int):
         selected = get_country_from_e164(u_dict.get('phone_e164'))
     ex = example_for_country(selected or 'HR')
     examples_map = {code: example_for_country(code)['display'] for code, _ in COUNTRY_CHOICES}
-    return templates.TemplateResponse('user_form.html', {"request": request, "user": u_dict, "action": f"/users/{user_id}/edit", "countries": COUNTRY_CHOICES, "selected_country": selected or 'HR', "phone_example": ex, "examples_map": examples_map, "user_types": USER_TYPES, "selected_user_type": u_dict.get('user_type','user'), "current_is_admin": is_session_admin(request)})
+    return templates.TemplateResponse(request=request, name='user_form.html', context={"request": request, "user": u_dict, "action": f"/users/{user_id}/edit", "countries": COUNTRY_CHOICES, "selected_country": selected or 'HR', "phone_example": ex, "examples_map": examples_map, "user_types": USER_TYPES, "selected_user_type": u_dict.get('user_type','user'), "current_is_admin": is_session_admin(request)})
 
 
 @app.post('/users/{user_id}/edit')
@@ -1152,7 +1152,7 @@ def update_user_form(request: Request, user_id: int, name: str = Form(None), pho
         u_dict = dict(u) if u else None
         ex = example_for_country(country)
         examples_map = {code: example_for_country(code)['display'] for code, _ in COUNTRY_CHOICES}
-        return templates.TemplateResponse('user_form.html', {"request": request, "user": u_dict, "error": str(e), "action": f"/users/{user_id}/edit", "countries": COUNTRY_CHOICES, "selected_country": country, "phone_example": ex, "examples_map": examples_map, "user_types": USER_TYPES, "selected_user_type": user_type, "current_is_admin": is_session_admin(request)})
+        return templates.TemplateResponse(request=request, name='user_form.html', context={"request": request, "user": u_dict, "error": str(e), "action": f"/users/{user_id}/edit", "countries": COUNTRY_CHOICES, "selected_country": country, "phone_example": ex, "examples_map": examples_map, "user_types": USER_TYPES, "selected_user_type": user_type, "current_is_admin": is_session_admin(request)})
 
 
 @app.get('/users/{user_id}/delete', response_class=HTMLResponse)
@@ -1174,7 +1174,7 @@ def confirm_delete_page(request: Request, user_id: int):
     if not int(ud.get('permanent', 0)):
         return RedirectResponse('/users?msg=Use+Delete+button+to+remove+this+account', status_code=303)
 
-    return templates.TemplateResponse('confirm_delete.html', {"request": request, "user": ud, "error": None})
+    return templates.TemplateResponse(request=request, name='confirm_delete.html', context={"request": request, "user": ud, "error": None})
 
 
 @app.post('/users/{user_id}/delete')
@@ -1204,7 +1204,7 @@ def delete_user_form(request: Request, user_id: int, admin_password: str = Form(
         # If no password provided, render confirmation form
         if not admin_password:
             ud = dict(existing) if not isinstance(existing, dict) else existing
-            return templates.TemplateResponse('confirm_delete.html', {"request": request, "user": ud, "error": None})
+            return templates.TemplateResponse(request=request, name='confirm_delete.html', context={"request": request, "user": ud, "error": None})
 
         # Verify the password for the current session admin
         current = request.session.get('user')
@@ -1223,7 +1223,7 @@ def delete_user_form(request: Request, user_id: int, admin_password: str = Form(
 
         if not stored_hash or not pwd_context.verify(admin_password, stored_hash):
             ud = dict(existing) if not isinstance(existing, dict) else existing
-            return templates.TemplateResponse('confirm_delete.html', {"request": request, "user": ud, "error": "Invalid admin password"})
+            return templates.TemplateResponse(request=request, name='confirm_delete.html', context={"request": request, "user": ud, "error": "Invalid admin password"})
 
         # Password ok; proceed to delete
         try:
@@ -1244,7 +1244,7 @@ def delete_user_form(request: Request, user_id: int, admin_password: str = Form(
                 users.append(dict(r) if not isinstance(r, dict) else r)
             except Exception:
                 users.append({'id': r[0], 'username': r[1], 'email': r[2]})
-        return templates.TemplateResponse('users.html', {"request": request, "users": users, "msg": None, "error": str(e)})
+        return templates.TemplateResponse(request=request, name='users.html', context={"request": request, "users": users, "msg": None, "error": str(e)})
 
 @app.get("/users/{user_id}")
 def read_user(user_id: int):
@@ -1745,8 +1745,8 @@ def home_duplicate(request: Request):
         u = dict(user) if user else None
         metrics = get_user_metrics(u)
         session_tips = request.session.get('tips')
-        return templates.TemplateResponse("home.html", {"request": request, "show_devtools": show, "user": u, "metrics": metrics, "session_tips": session_tips, "t": t_dict, "lang": lang})
-    return templates.TemplateResponse("home.html", {"request": request, "show_devtools": show, "user": None, "metrics": {}, "t": t_dict, "lang": lang})
+        return templates.TemplateResponse(request=request, name="home.html", context={"request": request, "show_devtools": show, "user": u, "metrics": metrics, "session_tips": session_tips, "t": t_dict, "lang": lang})
+    return templates.TemplateResponse(request=request, name="home.html", context={"request": request, "show_devtools": show, "user": None, "metrics": {}, "t": t_dict, "lang": lang})
 
 
 @app.get("/devtools", response_class=HTMLResponse)
@@ -1757,10 +1757,10 @@ def devtools_page(request: Request):
 
     # logged in but not admin: show the page with a contact message
     if not is_session_admin(request):
-        return templates.TemplateResponse("developer_tools.html", {"request": request, "error": "Contact admin to gain access"})
+        return templates.TemplateResponse(request=request, name="developer_tools.html", context={"request": request, "error": "Contact admin to gain access"})
 
     # admin: full access
-    return templates.TemplateResponse("developer_tools.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="developer_tools.html", context={"request": request})
 
 
 @app.get("/signup", response_class=HTMLResponse)
@@ -1769,7 +1769,7 @@ def signup_page(request: Request):
     t_dict = translations.get(lang, translations['en'])
     ex = example_for_country('HR')
     examples_map = {code: example_for_country(code)['display'] for code, _ in COUNTRY_CHOICES}
-    return templates.TemplateResponse("signup.html", {"request": request, "countries": COUNTRY_CHOICES, "selected_country": 'HR', "phone_example": ex, "examples_map": examples_map, "name": '', "phone": '', "username": '', "t": t_dict, "lang": lang})
+    return templates.TemplateResponse(request=request, name="signup.html", context={"request": request, "countries": COUNTRY_CHOICES, "selected_country": 'HR', "phone_example": ex, "examples_map": examples_map, "name": '', "phone": '', "username": '', "t": t_dict, "lang": lang})
 
 
 @app.post("/signup")
@@ -1796,13 +1796,13 @@ def signup(request: Request, name: str = Form(...),
     except Exception as e:
         ex = example_for_country(country)
         examples_map = {code: example_for_country(code)['display'] for code, _ in COUNTRY_CHOICES}
-        return templates.TemplateResponse("signup.html", {"request": request, "error": str(e), "countries": COUNTRY_CHOICES, "selected_country": country, "phone_example": ex, "examples_map": examples_map, "name": name, "phone": phone, "username": username, "email": email})
+        return templates.TemplateResponse(request=request, name="signup.html", context={"request": request, "error": str(e), "countries": COUNTRY_CHOICES, "selected_country": country, "phone_example": ex, "examples_map": examples_map, "name": name, "phone": phone, "username": username, "email": email})
 
     # Check if username or email exists
     if db.get_user_by_username(username) or db.get_user_by_login(email):
         ex = example_for_country(country)
         examples_map = {code: example_for_country(code)['display'] for code, _ in COUNTRY_CHOICES}
-        return templates.TemplateResponse("signup.html", {"request": request, "error": "Username or email already exists", "countries": COUNTRY_CHOICES, "selected_country": country, "phone_example": ex, "examples_map": examples_map, "name": name, "phone": phone, "username": username, "email": email})
+        return templates.TemplateResponse(request=request, name="signup.html", context={"request": request, "error": "Username or email already exists", "countries": COUNTRY_CHOICES, "selected_country": country, "phone_example": ex, "examples_map": examples_map, "name": name, "phone": phone, "username": username, "email": email})
 
     # Save user (store password hash in users.password_hash)
     try:
@@ -1837,7 +1837,7 @@ def signup(request: Request, name: str = Form(...),
     except Exception as e:
         ex = example_for_country(country)
         examples_map = {code: example_for_country(code)['display'] for code, _ in COUNTRY_CHOICES}
-        return templates.TemplateResponse("signup.html", {"request": request, "error": str(e), "countries": COUNTRY_CHOICES, "selected_country": country, "phone_example": ex, "examples_map": examples_map, "name": name, "phone": phone, "username": username, "email": email})
+        return templates.TemplateResponse(request=request, name="signup.html", context={"request": request, "error": str(e), "countries": COUNTRY_CHOICES, "selected_country": country, "phone_example": ex, "examples_map": examples_map, "name": name, "phone": phone, "username": username, "email": email})
 
     return RedirectResponse("/login", status_code=302)
 
@@ -1849,14 +1849,14 @@ def eula_page(request: Request):
     lang = get_lang(request)
     t_dict = translations.get(lang, translations['en'])
     show = is_session_admin(request)
-    return templates.TemplateResponse("eula.html", {"request": request, "t": t_dict, "lang": lang, "show_devtools": show})
+    return templates.TemplateResponse(request=request, name="eula.html", context={"request": request, "t": t_dict, "lang": lang, "show_devtools": show})
 
 
 @app.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
     lang = get_lang(request)
     t_dict = translations.get(lang, translations['en'])
-    return templates.TemplateResponse("login.html", {"request": request, "t": t_dict, "lang": lang})
+    return templates.TemplateResponse(request=request, name="login.html", context={"request": request, "t": t_dict, "lang": lang})
 
 
 @app.post("/login")
@@ -1867,7 +1867,7 @@ def login(request: Request,
     user = db.get_user_by_login(who)
 
     if not user:
-        return templates.TemplateResponse("login.html", {"request": request, "error": "Invalid username or password"})
+        return templates.TemplateResponse(request=request, name="login.html", context={"request": request, "error": "Invalid username or password"})
 
     # Get stored password hash (use mapping when possible)
     try:
@@ -1880,7 +1880,7 @@ def login(request: Request,
             stored_hash = None
 
     if not stored_hash or not pwd_context.verify(password, stored_hash):
-        return templates.TemplateResponse("login.html", {"request": request, "error": "Invalid username or password"})
+        return templates.TemplateResponse(request=request, name="login.html", context={"request": request, "error": "Invalid username or password"})
 
     # Save login session using canonical username
     try:
@@ -2145,7 +2145,7 @@ def profile_page(request: Request):
     show_devtools = is_session_admin(request)
     lang = get_lang(request)
     t = translations[lang]
-    return templates.TemplateResponse('profile.html', {'request': request, 'user': u, 'show_devtools': show_devtools, 't': t, 'lang': lang})
+    return templates.TemplateResponse(request=request, name='profile.html', context={'request': request, 'user': u, 'show_devtools': show_devtools, 't': t, 'lang': lang})
 
 
 @app.get('/settings', response_class=HTMLResponse)
@@ -2159,7 +2159,7 @@ def settings_page(request: Request):
     u = dict(user) if not isinstance(user, dict) else user
     lang = get_lang(request)
     t = translations[lang]
-    return templates.TemplateResponse('settings.html', {'request': request, 'user': u, 't': t, 'lang': lang})
+    return templates.TemplateResponse(request=request, name='settings.html', context={'request': request, 'user': u, 't': t, 'lang': lang})
 
 
 @app.post('/profile')
@@ -2237,7 +2237,7 @@ def daily_co2_page(request: Request, period: str = Query('hour', alias='range'))
         lang = get_lang(request)
         t = translations[lang]
         context.update({'t': t, 'lang': lang})
-        return templates.TemplateResponse('daily_co2.html', context)
+        return templates.TemplateResponse(request=request, name='daily_co2.html', context=context)
     return RedirectResponse('/?msg=Error+loading+data')
 
 
@@ -2255,7 +2255,7 @@ def eco_score_page(request: Request, period: str = Query('week', alias='range'))
     lang = get_lang(request)
     t = translations[lang]
     if isinstance(data, dict) and data.get('scores') is not None:
-        return templates.TemplateResponse('eco_score.html', {'request': request, 'user': u, 'range': period, 'scores': data.get('scores'), 'show_devtools': show_devtools, 't': t, 'lang': lang})
+        return templates.TemplateResponse(request=request, name='eco_score.html', context={'request': request, 'user': u, 'range': period, 'scores': data.get('scores'), 'show_devtools': show_devtools, 't': t, 'lang': lang})
     return RedirectResponse('/?msg=Error+loading+data')
 
 
@@ -2276,7 +2276,7 @@ def gps_tracking_page(request: Request):
     show_devtools = is_session_admin(request)
     lang = get_lang(request)
     t = translations[lang]
-    return templates.TemplateResponse('gps_tracking.html', {'request': request, 'user': u, 'tracks': tracks, 'show_devtools': show_devtools, 't': t, 'lang': lang})
+    return templates.TemplateResponse(request=request, name='gps_tracking.html', context={'request': request, 'user': u, 'tracks': tracks, 'show_devtools': show_devtools, 't': t, 'lang': lang})
 
 
 @app.get('/admin/users/{user_id}/tracks', response_class=HTMLResponse)
@@ -2293,7 +2293,7 @@ def admin_user_tracks_page(request: Request, user_id: int):
         tracks = [dict(r) for r in db.get_tracks_for_user(user_id)]
     except Exception:
         tracks = []
-    return templates.TemplateResponse('admin_user_tracks.html', {'request': request, 'user': u, 'tracks': tracks})
+    return templates.TemplateResponse(request=request, name='admin_user_tracks.html', context={'request': request, 'user': u, 'tracks': tracks})
 
 
 @app.get('/admin/gps', response_class=HTMLResponse)
@@ -2312,7 +2312,7 @@ def admin_gps_page(request: Request):
                 users.append({'id': row[0], 'username': row[1], 'email': row[2] if len(row) > 2 else ''})
     except Exception:
         users = []
-    return templates.TemplateResponse('admin_gps.html', {'request': request, 'users': users})
+    return templates.TemplateResponse(request=request, name='admin_gps.html', context={'request': request, 'users': users})
 
 @app.post('/admin/tracks/{track_id}/delete')
 def admin_delete_track(request: Request, track_id: int):
@@ -2349,7 +2349,7 @@ def admin_emission_factors(request: Request):
         factors = [dict(r) for r in rows]
     except Exception:
         factors = []
-    return templates.TemplateResponse('admin_emission_factors.html', {'request': request, 'factors': factors})
+    return templates.TemplateResponse(request=request, name='admin_emission_factors.html', context={'request': request, 'factors': factors})
 
 
 @app.post('/admin/emission_factors')
@@ -2386,7 +2386,7 @@ def admin_activities(request: Request):
                 activities.append({'id': rrow[0], 'user_id': rrow[1], 'username': rrow[2], 'category': rrow[3], 'subtype': rrow[4], 'co2_kg': rrow[5], 'quantity': rrow[6], 'unit': rrow[7], 'note': rrow[8], 'created_at': rrow[9]})
     except Exception:
         activities = []
-    return templates.TemplateResponse('admin_activities.html', {'request': request, 'activities': activities})
+    return templates.TemplateResponse(request=request, name='admin_activities.html', context={'request': request, 'activities': activities})
 
 
 @app.post('/admin/activities/{activity_id}/delete')
@@ -2532,7 +2532,7 @@ def track_page(request: Request):
     show_devtools = is_session_admin(request)
     lang = get_lang(request)
     t = translations[lang]
-    return templates.TemplateResponse('track.html', {'request': request, 'user': u, 'metrics': metrics, 'activities': activities, 'show_devtools': show_devtools, 't': t, 'lang': lang})
+    return templates.TemplateResponse(request=request, name='track.html', context={'request': request, 'user': u, 'metrics': metrics, 'activities': activities, 'show_devtools': show_devtools, 't': t, 'lang': lang})
 
 @app.post('/api/emission_factors')
 def api_set_emission_factor(request: Request, category: str = Form(...), subtype: str = Form(None), unit: str = Form(None), co2_kg_per_unit: float = Form(...), source: str = Form(None)):
