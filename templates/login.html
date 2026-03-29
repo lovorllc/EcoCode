@@ -222,6 +222,12 @@
             <h1>{{ t.Welcome_exclamation }}</h1>
             <p style="color: var(--text-soft); margin-bottom: 2.5rem; font-weight: 600;">{{ t.Login_to_continue }}</p>
 
+            {% if error %}
+            <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; color: #ef4444; font-weight: 600; font-size: 0.9rem;">
+                ⚠️ {{ error }}
+            </div>
+            {% endif %}
+
             <form id="login-form" action="/login" method="post">
                 <div class="input-group">
                     <label>{{ t.Username_or_Email }}</label>

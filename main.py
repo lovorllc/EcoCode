@@ -928,7 +928,8 @@ def api_user_daily_co2(request: Request, user_id: int, period: str = Query('hour
 
 @app.get('/api/users/{user_id}/eco_scores')
 def api_user_eco_scores(request: Request, user_id: int, period: str = Query('week', alias='range')):
-    """Return datestamped eco scores for requested range: week, month, year, all (mocked)."""
+    """Return datestamped eco scores for requested range: week, month, year, all.
+    Eco scores are summed from eco_score values stored in activities."""
     api_user = _get_api_user(request)
     if not api_user:
         return JSONResponse({"error": "Unauthorized"}, status_code=401)
@@ -946,21 +947,16 @@ def api_user_eco_scores(request: Request, user_id: int, period: str = Query('wee
     mapping = {'week':7, 'month':30, 'year':365, 'all': 365}
     days = mapping.get(period, 7)
     today = date.today()
-    # compute activity sums over the range and derive scores from actual CO2
+    # Get eco_score sums from activities for the date range
     start_date = (today - timedelta(days=days-1)).isoformat()
     end_date = today.isoformat()
-    activity_by_day = db.get_activity_sums_by_day(ud.get('id'), start_date, end_date)
+    eco_scores_by_day = db.get_eco_score_sums_by_day(ud.get('id'), start_date, end_date)
     scores = []
     for i in range(days-1, -1, -1):
         d = today - timedelta(days=i)
         day_str = d.isoformat()
-        co2 = round(activity_by_day.get(day_str, 0.0), 2)
-        # Default score=0 when no activity; otherwise score inversely related to CO2
-        if co2 == 0:
-            score = 0
-        else:
-            score = int(max(0, min(100, 100 - co2 * 3)))
-        scores.append({'date': day_str, 'score': score, 'co2': co2})
+        eco_score = round(eco_scores_by_day.get(day_str, 0.0), 2)
+        scores.append({'date': day_str, 'score': int(eco_score)})
     return {'range': period, 'scores': scores}
 
 
@@ -1854,10 +1850,13 @@ def login(request: Request,
           who: str = Form(...),
           password: str = Form(...)):
 
+    lang = get_lang(request)
+    t_dict = translations.get(lang, translations['en'])
+
     user = db.get_user_by_login(who)
 
     if not user:
-        return templates.TemplateResponse(request=request, name="login.html", context={"request": request, "error": "Invalid username or password"})
+        return templates.TemplateResponse(request=request, name="login.html", context={"request": request, "error": "Invalid username or password", "t": t_dict, "lang": lang})
 
     # Get stored password hash (use mapping when possible)
     try:
@@ -1870,7 +1869,7 @@ def login(request: Request,
             stored_hash = None
 
     if not stored_hash or not pwd_context.verify(password, stored_hash):
-        return templates.TemplateResponse(request=request, name="login.html", context={"request": request, "error": "Invalid username or password"})
+        return templates.TemplateResponse(request=request, name="login.html", context={"request": request, "error": "Invalid username or password", "t": t_dict, "lang": lang})
 
     # Save login session using canonical username
     try:
@@ -2391,6 +2390,151 @@ def admin_delete_activity(request: Request, activity_id: int):
         return RedirectResponse(f'/admin/activities?msg=Delete+failed:+{e}', status_code=303)
 
 
+@app.get('/admin/eco-scores', response_class=HTMLResponse)
+def admin_eco_scores(request: Request):
+    """Admin panel for managing eco score points for users"""
+    r = require_admin(request)
+    if r:
+        return r
+    try:
+        # Get all users with their point totals
+        rows = db.get_all_users()
+        users = []
+        for row in rows:
+            try:
+                u = dict(row) if not isinstance(row, dict) else row
+            except Exception:
+                u = {'id': row[0], 'username': row[1], 'email': row[2], 'name': row[4] if len(row) > 4 else None, 'total_points': 0}
+            users.append({
+                'id': u.get('id'),
+                'username': u.get('username'),
+                'email': u.get('email'),
+                'name': u.get('name'),
+                'total_points': u.get('total_points', 0)
+            })
+        
+        # Get all activities grouped by category and subtype
+        try:
+            all_activities = db.get_all_activities(limit=10000)
+            activities_by_user = {}
+            for act in all_activities:
+                try:
+                    a = dict(act) if not isinstance(act, dict) else act
+                    user_id = a.get('user_id')
+                    if user_id not in activities_by_user:
+                        activities_by_user[user_id] = []
+                    activities_by_user[user_id].append(a)
+                except Exception:
+                    continue
+        except Exception:
+            activities_by_user = {}
+        
+        return templates.TemplateResponse(request=request, name='admin_eco_scores.html', context={'request': request, 'users': users, 'activities_by_user': activities_by_user})
+    except Exception as e:
+        return templates.TemplateResponse(request=request, name='admin_eco_scores.html', context={'request': request, 'users': [], 'activities_by_user': {}, 'error': str(e)})
+
+
+@app.post('/admin/eco-scores/{user_id}/apply')
+def admin_apply_eco_score(request: Request, user_id: int, points: int = Form(...)):
+    """Apply eco score points to a user (positive = add, negative = subtract, never below 0)"""
+    r = require_admin(request)
+    if r:
+        return r
+    try:
+        user = db.get_user(user_id)
+        if not user:
+            return RedirectResponse('/admin/eco-scores?msg=User+not+found', status_code=303)
+        
+        # Get current points
+        u = dict(user) if not isinstance(user, dict) else user
+        current_points = int(u.get('total_points', 0) or 0)
+        
+        # Apply points (never below 0)
+        new_points = max(0, current_points + points)
+        
+        # Update user
+        with db.connect() as conn:
+            cur = conn.cursor()
+            cur.execute('UPDATE users SET total_points = ? WHERE id = ?', (new_points, user_id))
+            conn.commit()
+        
+        msg = f"Bodovi ažurirani: {current_points} → {new_points}"
+        return RedirectResponse(f'/admin/eco-scores?msg={msg}', status_code=303)
+    except Exception as e:
+        return RedirectResponse(f'/admin/eco-scores?msg=Greška:+{e}', status_code=303)
+
+
+@app.get('/api/admin/activity-types')
+def api_admin_activity_types(request: Request):
+    """Get all activity types (category/subtype combinations) with their eco_score stats"""
+    r = require_api_admin(request)
+    if r:
+        return r
+    try:
+        all_activities = db.get_all_activities(limit=100000)
+        
+        # Group by category and subtype
+        activity_types = {}
+        for act in all_activities:
+            try:
+                a = dict(act) if not isinstance(act, dict) else act
+                category = a.get('category', 'Unknown')
+                subtype = a.get('subtype', 'Unknown')
+                eco_score = float(a.get('eco_score') or 0)
+                
+                key = f"{category}::{subtype}"
+                if key not in activity_types:
+                    activity_types[key] = {
+                        'category': category,
+                        'subtype': subtype,
+                        'eco_scores': [],
+                        'count': 0
+                    }
+                
+                if eco_score != 0:
+                    activity_types[key]['eco_scores'].append(eco_score)
+                activity_types[key]['count'] += 1
+            except Exception:
+                continue
+        
+        # Calculate average and stats
+        result = []
+        for key, data in activity_types.items():
+            avg_eco = sum(data['eco_scores']) / len(data['eco_scores']) if data['eco_scores'] else 0
+            result.append({
+                'category': data['category'],
+                'subtype': data['subtype'],
+                'count': data['count'],
+                'avg_eco_score': round(avg_eco, 3),
+                'min_eco_score': min(data['eco_scores']) if data['eco_scores'] else 0,
+                'max_eco_score': max(data['eco_scores']) if data['eco_scores'] else 0
+            })
+        
+        return {"activity_types": sorted(result, key=lambda x: (x['category'], x['subtype']))}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@app.post('/api/admin/activity-types/update-eco2')
+def api_update_activity_type_eco2(request: Request, category: str = Form(...), subtype: str = Form(...), eco_score: float = Form(...)):
+    """Update eco_score value for all activities of a specific type"""
+    r = require_api_admin(request)
+    if r:
+        return r
+    try:
+        # Update all activities of this category/subtype
+        with db.connect() as conn:
+            cur = conn.cursor()
+            cur.execute('UPDATE activities SET eco_score = ? WHERE category = ? AND subtype = ?', 
+                       (eco_score, category, subtype))
+            updated = cur.rowcount
+            conn.commit()
+        
+        return {"ok": True, "updated": updated, "message": f"Ažurirano {updated} aktivnosti"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
 @app.get('/debug/tracks')
 def debug_get_tracks(request: Request, limit: int = Query(1000)):
     r = require_admin(request)
@@ -2665,7 +2809,8 @@ def api_add_activity(request: Request, category: str = Form(...), subtype: str =
 
     try:
         # Spremanje u bazu - final_co2 sada ima ispravan minus za uštede
-        aid = db.add_activity(u.get('id'), category, subtype, float(final_co2), note, quantity, unit)
+        # Initially set eco_score to match co2_kg
+        aid = db.add_activity(u.get('id'), category, subtype, float(final_co2), eco_score=float(final_co2), note=note, quantity=quantity, unit=unit)
         
         # Obavijesti druge dijelove aplikacije o promjeni (ako koristiš signale)
         return {"id": aid, "co2_kg": final_co2, "ok": True}

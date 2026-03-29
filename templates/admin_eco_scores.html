@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Eco Score Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #1e293b;
+        }
+        
+        h1 {
+            font-size: 28px;
+            color: #fff;
+        }
+        
+        .back-btn {
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .back-btn:hover {
+            background: #2563eb;
+        }
+        
+        .message {
+            background: #10b981;
+            color: #fff;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message.show {
+            display: block;
+        }
+        
+        .error {
+            background: #ef4444;
+        }
+        
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #1e293b;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .users-table thead {
+            background: #334155;
+        }
+        
+        .users-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #cbd5e1;
+            border-bottom: 1px solid #475569;
+        }
+        
+        .users-table td {
+            padding: 15px;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .users-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .users-table tbody tr {
+            transition: background 0.2s;
+        }
+        
+        .users-table tbody tr:hover {
+            background: #334155;
+        }
+        
+        .points-badge {
+            display: inline-block;
+            background: #ec4899;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .points-badge.zero {
+            background: #64748b;
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-add {
+            background: #10b981;
+            color: #fff;
+        }
+        
+        .btn-add:hover {
+            background: #059669;
+        }
+        
+        .btn-subtract {
+            background: #f97316;
+            color: #fff;
+        }
+        
+        .btn-subtract:hover {
+            background: #ea580c;
+        }
+        
+        .activity-section {
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .activity-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #60a5fa;
+            margin-bottom: 15px;
+        }
+        
+        .activity-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .activity-item {
+            padding: 12px;
+            background: #0f172a;
+            border-left: 3px solid #3b82f6;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .activity-info {
+            flex: 1;
+        }
+        
+        .activity-category {
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+        
+        .activity-points {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+        
+        .point-value {
+            font-weight: 600;
+            color: #ec4899;
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #64748b;
+            font-size: 16px;
+        }
+        
+        .info-box {
+            background: #1e293b;
+            border-left: 4px solid #0ea5e9;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .info-box h3 {
+            color: #0ea5e9;
+            margin-bottom: 8px;
+        }
+        
+        .info-box p {
+            color: #cbd5e1;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        
+        .modal-content input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 4px;
+            color: #e2e8f0;
+            font-size: 16px;
+        }
+        
+        .modal-content input:focus {
+            outline: none;
+            border-color: #ec4899;
+            box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .modal-actions button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-cancel {
+            background: #64748b;
+            color: #fff;
+        }
+        
+        .btn-cancel:hover {
+            background: #475569;
+        }
+        
+        .btn-confirm {
+            background: #ec4899;
+            color: #fff;
+        }
+        
+        .btn-confirm:hover {
+            background: #db2777;
+        }
+
+        .modal-form-group {
+            margin-bottom: 15px;
+        }
+
+        .modal-form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .modal-form-group input {
+            width: 100%;
+            padding: 10px;
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 1rem;
+        }
+
+        .modal-form-group input:focus {
+            outline: none;
+            border-color: #ec4899;
+            box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⭐ Upravljanje Eco Bodovima</h1>
+            <a href="/devtools" class="back-btn">← Povratak</a>
+        </div>
+        
+        {% if message %}
+        <div class="message show">{{ message }}</div>
+        {% endif %}
+        
+        {% if error %}
+        <div class="message show error">Greška: {{ error }}</div>
+        {% endif %}
+        
+        <div class="info-box">
+            <h3>📊 Kako funkcionira sustav bodova?</h3>
+            <p>
+                • <strong>Pozitivne vrijednosti CO₂:</strong> Dodaju bodove korisniku (veća emisija = više bodova)<br>
+                • <strong>Negativne vrijednosti CO₂:</strong> Oduzimaju bodove korisniku (manja emisija = manje bodova)<br>
+                • <strong>Minimalno:</strong> Korisnik nikada ne može imati manje od 0 bodova
+            </p>
+        </div>
+        
+        {% if users %}
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>Korisnik</th>
+                    <th>Email</th>
+                    <th>Trenutni Bodovi</th>
+                    <th>Akcije</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>
+                        <div style="font-weight: 500;">{{ user.username }}</div>
+                        {% if user.name %}<div style="font-size: 14px; color: #94a3b8;">{{ user.name }}</div>{% endif %}
+                    </td>
+                    <td>{{ user.email or '-' }}</td>
+                    <td>
+                        <span class="points-badge {% if user.total_points == 0 %}zero{% endif %}">
+                            {{ user.total_points or 0 }} 🏆
+                        </span>
+                    </td>
+                    <td>
+                        <div class="user-actions">
+                            <button class="btn-small btn-add" onclick="openPointsModal({{ user.id }}, '{{ user.username }}', true)">
+                                + Dodaj
+                            </button>
+                            <button class="btn-small btn-subtract" onclick="openPointsModal({{ user.id }}, '{{ user.username }}', false)">
+                                - Oduzmi
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty">
+            <p>Nema korisnika u sustavu.</p>
+        </div>
+        {% endif %}
+
+        <!-- Activity Types Management Section -->
+        <div style="margin-top: 60px;">
+            <h2 style="margin-bottom: 20px; color: #60a5fa;">⚙️ Upravljanje Eco Bodovima po Tipu Aktivnosti</h2>
+            <div class="info-box">
+                <h3>💡 Kako ažurirati eco bodove?</h3>
+                <p>Odaberite tip aktivnosti i unesite novu vrijednost eco bodova. Ova vrijednost će se primjeniti na sve postojeće aktivnosti tog tipa u dnevniku.</p>
+            </div>
+            
+            <table class="users-table" id="activityTypesTable">
+                <thead>
+                    <tr>
+                        <th>Kategorija</th>
+                        <th>Podkategorija</th>
+                        <th>Broj Aktivnosti</th>
+                        <th>Min/Max Eco Bodova</th>
+                        <th>Prosječni Eco Bodovi</th>
+                        <th>Akcije</th>
+                    </tr>
+                </thead>
+                <tbody id="activityTypesBody">
+                    <tr><td colspan="6" style="text-align: center; padding: 20px;">Učitavanje...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        {% if activities_by_user %}
+        <div style="margin-top: 40px; display: none;">
+            <h2 style="margin-bottom: 20px; color: #60a5fa;">📈 Aktivnosti Korisnika (Arhiva)</h2>
+            {% for user_id, activities in activities_by_user.items() %}
+                {% set user = users|selectattr('id', 'equalto', user_id)|first %}
+                {% if user and activities %}
+                <div class="activity-section">
+                    <div class="activity-title">{{ user.username }} - {{ activities|length }} aktivnosti</div>
+                    <ul class="activity-list">
+                        {% for activity in activities %}
+                        <li class="activity-item">
+                            <div class="activity-info">
+                                <div class="activity-category">
+                                    {{ activity.category or 'Nepoznata' }} 
+                                    {% if activity.subtype %}
+                                    · {{ activity.subtype }}
+                                    {% endif %}
+                                </div>
+                                <div class="activity-points">
+                                    CO₂: <span class="point-value">
+                                        {% if activity.co2_kg > 0 %}+{% endif %}{{ "%.2f"|format(activity.co2_kg)|default('-') }} kg
+                                    </span>
+                                    <span style="margin-left: 15px;">
+                                        Bodovi: <span class="point-value">
+                                            {% if activity.co2_kg > 0 %}+{% endif %}{{ "%.0f"|format(activity.co2_kg * 10 if activity.co2_kg else 0) }}
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Modal za uređivanje eco bodova po tipu aktivnosti -->
+    <div id="editActivityTypeModal" class="modal">
+        <div class="modal-content">
+            <h2 id="editActivityTypeTitle">Uredi Eco Bodove</h2>
+            <form id="editActivityTypeForm" onsubmit="saveActivityTypeCo2(event)">
+                <div class="modal-form-group">
+                    <label>Kod Aktivnosti</label>
+                    <input type="text" id="editActivityTypeKey" readonly style="opacity: 0.7;">
+                </div>
+                <div class="modal-form-group">
+                    <label>Eco Bodovi - Nova Vrijednost</label>
+                    <input 
+                        type="number" 
+                        id="editActivityTypeCo2" 
+                        step="0.01" 
+                        min="0" 
+                        placeholder="Unesite novu vrijednost"
+                        required
+                    >
+                </div>
+                <div class="modal-form-group" id="activityTypeStats" style="color: #94a3b8; font-size: 0.9rem; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 8px;">
+                    <p id="statsText"></p>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeEditActivityTypeModal()">Otkaži</button>
+                    <button type="submit" class="btn-confirm">Ažuriraj Sve</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        let currentActivityType = null;
+
+        // Load activity types on page load
+        window.addEventListener('load', loadActivityTypes);
+
+        async function loadActivityTypes() {
+            try {
+                const response = await fetch('/api/admin/activity-types');
+                const data = await response.json();
+                
+                if (data.error) {
+                    document.getElementById('activityTypesBody').innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444;">Greška: ${data.error}</td></tr>`;
+                    return;
+                }
+                
+                const types = data.activity_types || [];
+                if (types.length === 0) {
+                    document.getElementById('activityTypesBody').innerHTML = `<tr><td colspan="6" style="text-align: center; color: #94a3b8;">Nema zabilježenih aktivnosti.</td></tr>`;
+                    return;
+                }
+                
+                let html = '';
+                types.forEach(type => {
+                    const key = `${type.category}:${type.subtype}`;
+                    const minMax = `${type.min_eco_score.toFixed(2)} - ${type.max_eco_score.toFixed(2)}`;
+                    html += `
+                        <tr>
+                            <td><strong>${type.category}</strong></td>
+                            <td>${type.subtype}</td>
+                            <td><span class="points-badge">${type.count}</span></td>
+                            <td>${minMax}</td>
+                            <td><span class="point-value">${type.avg_eco_score.toFixed(3)}</span></td>
+                            <td>
+                                <button class="btn-small btn-add" onclick="openEditActivityTypeModal('${type.category}', '${type.subtype}', ${type.avg_eco_score})">
+                                    ✏️ Uredi
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                document.getElementById('activityTypesBody').innerHTML = html;
+            } catch (error) {
+                document.getElementById('activityTypesBody').innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444;">Greška pri učitavanju: ${error.message}</td></tr>`;
+            }
+        }
+
+        function openEditActivityTypeModal(category, subtype, currentEcoScore) {
+            currentActivityType = { category, subtype, currentEcoScore };
+            document.getElementById('editActivityTypeTitle').textContent = `Uredi Eco Bodove - ${category} / ${subtype}`;
+            document.getElementById('editActivityTypeKey').value = `${category} • ${subtype}`;
+            document.getElementById('editActivityTypeCo2').value = currentEcoScore;
+            
+            document.getElementById('statsText').innerHTML = `
+                <strong>Trenutna prosječna vrijednost:</strong> ${currentEcoScore.toFixed(3)} bodova<br>
+                <strong>Akcija:</strong> Sve aktivnosti ovog tipa će biti ažurirane na novu vrijednost
+            `;
+            
+            document.getElementById('editActivityTypeModal').classList.add('show');
+            document.getElementById('editActivityTypeCo2').focus();
+        }
+
+        function closeEditActivityTypeModal() {
+            document.getElementById('editActivityTypeModal').classList.remove('show');
+            currentActivityType = null;
+        }
+
+        async function saveActivityTypeCo2(e) {
+            e.preventDefault();
+            
+            if (!currentActivityType) {
+                alert('Greška: Nema odabranog tipa aktivnosti');
+                return;
+            }
+
+            const newCo2 = parseFloat(document.getElementById('editActivityTypeCo2').value);
+            if (isNaN(newCo2)) {
+                alert('Greška: Unesite valjanu vrijednost eco bodova');
+                return;
+            }
+
+            try {
+                const form = new URLSearchParams();
+                form.append('category', currentActivityType.category);
+                form.append('subtype', currentActivityType.subtype);
+                form.append('eco_score', newCo2);
+
+                const response = await fetch('/api/admin/activity-types/update-eco2', {
+                    method: 'POST',
+                    body: form
+                });
+
+                const data = await response.json();
+
+                if (data.ok) {
+                    closeEditActivityTypeModal();
+                    
+                    // Show success message
+                    const message = document.querySelector('.message');
+                    if (message) {
+                        message.textContent = data.message || 'Eco bodovi su ažurirani!';
+                        message.classList.add('show');
+                        setTimeout(() => message.classList.remove('show'), 5000);
+                    }
+                    
+                    // Reload activity types table
+                    loadActivityTypes();
+                } else {
+                    alert('Greška: ' + (data.error || 'Nepoznata greška'));
+                }
+            } catch (error) {
+                alert('Greška pri slanju zahtjeva: ' + error.message);
+            }
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeEditActivityTypeModal();
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('editActivityTypeModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditActivityTypeModal();
+            }
+        });
+    </script>
+</body>
+</html>

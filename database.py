@@ -263,6 +263,7 @@ class Database:
                     category TEXT NOT NULL,
                     subtype TEXT,
                     co2_kg REAL DEFAULT 0.0,
+                    eco_score REAL DEFAULT 0.0,
                     quantity REAL,
                     unit TEXT,
                     note TEXT,
@@ -393,14 +394,14 @@ class Database:
             return cursor.lastrowid
 
     # ---------- Activities ----------
-    def add_activity(self, user_id: int, category: str, subtype: str = None, co2_kg: float = 0.0, note: str = None, quantity: float = None, unit: str = None):
+    def add_activity(self, user_id: int, category: str, subtype: str = None, co2_kg: float = 0.0, eco_score: float = 0.0, note: str = None, quantity: float = None, unit: str = None):
         """Create an activity entry for a user."""
         with self.connect() as conn:
             cursor = conn.cursor()
-            # Ensure insertion order matches function signature: co2_kg, note, quantity, unit
+            # Ensure insertion order matches function signature: co2_kg, eco_score, note, quantity, unit
             cursor.execute(
-                "INSERT INTO activities (user_id, category, subtype, co2_kg, note, quantity, unit, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)",
-                (user_id, category, subtype, co2_kg, note, quantity, unit)
+                "INSERT INTO activities (user_id, category, subtype, co2_kg, eco_score, note, quantity, unit, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)",
+                (user_id, category, subtype, co2_kg, eco_score, note, quantity, unit)
             )
             conn.commit()
             return cursor.lastrowid
@@ -430,7 +431,7 @@ class Database:
     def get_activities_for_user(self, user_id: int, limit: int = 100):
         with self.connect() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT id, user_id, category, subtype, co2_kg, quantity, unit, note, created_at FROM activities WHERE user_id = ? ORDER BY created_at DESC LIMIT ?", (user_id, limit))
+            cursor.execute("SELECT id, user_id, category, subtype, co2_kg, eco_score, quantity, unit, note, created_at FROM activities WHERE user_id = ? ORDER BY created_at DESC LIMIT ?", (user_id, limit))
             rows = cursor.fetchall()
             # do not mutate DB here; return rows as-is and let application layer compute display co2
             return rows
@@ -439,14 +440,14 @@ class Database:
         """Return activities for a user on a specific date (YYYY-MM-DD)."""
         with self.connect() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT id, user_id, category, subtype, co2_kg, quantity, unit, note, created_at FROM activities WHERE user_id = ? AND date(created_at) = ? ORDER BY created_at ASC", (user_id, target_date))
+            cursor.execute("SELECT id, user_id, category, subtype, co2_kg, eco_score, quantity, unit, note, created_at FROM activities WHERE user_id = ? AND date(created_at) = ? ORDER BY created_at ASC", (user_id, target_date))
             return cursor.fetchall()
 
     def get_all_activities(self, limit: int = 1000):
         """Return all activities across users (most recent first) with username included."""
         with self.connect() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT activities.id, activities.user_id, users.username, activities.category, activities.subtype, activities.co2_kg, activities.quantity, activities.unit, activities.note, activities.created_at FROM activities LEFT JOIN users ON activities.user_id = users.id ORDER BY activities.created_at DESC LIMIT ?", (limit,))
+            cursor.execute("SELECT activities.id, activities.user_id, users.username, activities.category, activities.subtype, activities.co2_kg, activities.eco_score, activities.quantity, activities.unit, activities.note, activities.created_at FROM activities LEFT JOIN users ON activities.user_id = users.id ORDER BY activities.created_at DESC LIMIT ?", (limit,))
             return cursor.fetchall()
 
     def apply_emission_factor_to_activities(self, category: str, subtype: str, co2_kg_per_unit: float):
@@ -573,6 +574,17 @@ class Database:
             res = {}
             for r in rows:
                 res[r[0]] = int(r[1] or 0)
+            return res
+
+    def get_eco_score_sums_by_day(self, user_id: int, start_date: str, end_date: str):
+        """Return dict date->sum(eco_score) for date range inclusive. Dates in YYYY-MM-DD."""
+        with self.connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT date(created_at) as d, SUM(eco_score) as total FROM activities WHERE user_id = ? AND date(created_at) BETWEEN ? AND ? GROUP BY d ORDER BY d ASC", (user_id, start_date, end_date))
+            rows = cursor.fetchall()
+            res = {}
+            for r in rows:
+                res[r[0]] = float(r[1] or 0)
             return res
 
     def get_activity(self, activity_id: int):
