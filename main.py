@@ -3,10 +3,12 @@ from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from jinja2 import FileSystemLoader, Environment
 import os
+import json
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from contextlib import asynccontextmanager
 import sqlite3
+import httpx
 from passlib.context import CryptContext
 from database import Database
 from auth import router as auth_router
@@ -15,6 +17,7 @@ from validators import validate_name, validate_username, validate_password, vali
 import random
 import time
 from datetime import date, timedelta, datetime
+from authlib.integrations.starlette_client import OAuth, OAuthError
 
 # Password hashing - must be defined before ensure_permanent_admin()
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
@@ -30,6 +33,7 @@ translations = {
         'Signup': 'Registriraj se',
         'Welcome': 'Dobrodošao',
         'Welcome_back': 'Bok',
+        'Or_continue_with': 'Ili nastavi s',
         'Your_effort_matters': 'Tvoj trud čini razliku.',
         'Emission': 'Emisija',
         'Savings': 'Ušteda',
@@ -215,6 +219,7 @@ translations = {
         'Signup': 'Signup',
         'Welcome': 'Welcome',
         'Welcome_back': 'Hi',
+        'Or_continue_with': 'Or continue with',
         'Your_effort_matters': 'Your effort matters.',
         'Emission': 'Emission',
         'Savings': 'Savings',
@@ -585,6 +590,69 @@ app.add_middleware(
 
 db = Database()
 
+oauth = OAuth()
+
+oauth.register(
+    name='google',
+    client_id=os.getenv('GOOGLE_CLIENT_ID', ''),
+    client_secret=os.getenv('GOOGLE_CLIENT_SECRET', ''),
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={'scope': 'openid email profile'}
+)
+
+oauth.register(
+    name='microsoft',
+    client_id=os.getenv('MICROSOFT_CLIENT_ID', ''),
+    client_secret=os.getenv('MICROSOFT_CLIENT_SECRET', ''),
+    server_metadata_url='https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration',
+    client_kwargs={'scope': 'openid email profile'}
+)
+
+oauth.register(
+    name='apple',
+    client_id=os.getenv('APPLE_CLIENT_ID', ''),
+    client_secret=os.getenv('APPLE_CLIENT_SECRET', ''),
+    server_metadata_url='https://appleid.apple.com/.well-known/openid-configuration',
+    client_kwargs={'scope': 'openid email name'}
+)
+
+oauth.register(
+    name='facebook',
+    client_id=os.getenv('FACEBOOK_CLIENT_ID', ''),
+    client_secret=os.getenv('FACEBOOK_CLIENT_SECRET', ''),
+    authorize_url='https://www.facebook.com/v12.0/dialog/oauth',
+    access_token_url='https://graph.facebook.com/v12.0/oauth/access_token',
+    client_kwargs={'scope': 'email public_profile'}
+)
+
+ADMIN_CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'admin_config.json')
+
+def load_admin_config():
+    try:
+        if not os.path.exists(ADMIN_CONFIG_FILE):
+            default = {
+                'eula': {},
+                'notifications': [],
+                'tips': [],
+                'system_mode': 'production',
+                'mode_history': []
+            }
+            with open(ADMIN_CONFIG_FILE, 'w', encoding='utf-8') as f:
+                json.dump(default, f, ensure_ascii=False, indent=2)
+            return default
+        with open(ADMIN_CONFIG_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return {'eula': {}, 'notifications': [], 'tips': [], 'system_mode': 'production', 'mode_history': []}
+
+
+def save_admin_config(cfg):
+    try:
+        with open(ADMIN_CONFIG_FILE, 'w', encoding='utf-8') as f:
+            json.dump(cfg, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print('Failed to save admin config', e)
+
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 
@@ -731,6 +799,7 @@ def home(request: Request):
         u = dict(user) if user else None
         metrics = get_user_metrics(u)
         session_tips = request.session.get('tips')
+        config = load_admin_config()
         context = {
             "request": request,
             "show_devtools": show,
@@ -738,16 +807,19 @@ def home(request: Request):
             "metrics": metrics,
             "session_tips": session_tips,
             "t": t_dict,
-            "lang": lang
+            "lang": lang,
+            "system_mode": config.get('system_mode','production')
         }
         return templates.TemplateResponse(request=request, name="home.html", context=context)
+    config = load_admin_config()
     context = {
         "request": request,
         "show_devtools": show,
         "user": None,
         "metrics": {},
         "t": t_dict,
-        "lang": lang
+        "lang": lang,
+        "system_mode": config.get('system_mode','production')
     }
     return templates.TemplateResponse(request=request, name="home.html", context=context)
 
@@ -878,6 +950,29 @@ def api_user_metrics(request: Request, user_id: int):
 
     metrics = get_user_metrics(ud)
     return metrics
+
+
+@app.get('/api/notifications')
+def api_notifications(request: Request):
+    # allow all logged users to see active notifications
+    config = load_admin_config()
+    notifications = []
+    now = date.today()
+    for n in config.get('notifications', []):
+        try:
+            start = datetime.fromisoformat(n.get('start_date')).date() if n.get('start_date') else None
+        except Exception:
+            start = None
+        try:
+            end = datetime.fromisoformat(n.get('end_date')).date() if n.get('end_date') else None
+        except Exception:
+            end = None
+        if start and now < start:
+            continue
+        if end and now > end:
+            continue
+        notifications.append(n)
+    return {'notifications': notifications}
 
 
 @app.get('/api/users/{user_id}/daily_co2')
@@ -1749,6 +1844,124 @@ def devtools_page(request: Request):
     return templates.TemplateResponse(request=request, name="developer_tools.html", context={"request": request})
 
 
+@app.get('/about', response_class=HTMLResponse)
+def about_page(request: Request):
+    lang = get_lang(request)
+    t_dict = translations.get(lang, translations['en'])
+    return templates.TemplateResponse(request=request, name='about.html', context={'request': request, 't': t_dict, 'lang': lang})
+
+
+@app.get('/admin/custom-tools', response_class=HTMLResponse)
+def admin_custom_tools_page(request: Request):
+    if 'user' not in request.session:
+        return RedirectResponse('/login')
+    if not is_session_admin(request):
+        return RedirectResponse('/devtools')
+    config = load_admin_config()
+    # Format EULA history dates
+    if 'eula_history' in config:
+        for h in config['eula_history']:
+            if 'saved_at' in h and h['saved_at']:
+                try:
+                    dt = datetime.fromisoformat(h['saved_at'].replace('Z', '+00:00'))
+                    h['formatted_saved_at'] = dt.strftime('%d.%m.%Y %H:%M:%S')
+                except:
+                    h['formatted_saved_at'] = h['saved_at']
+            else:
+                h['formatted_saved_at'] = ''
+    return templates.TemplateResponse(request=request, name='admin_custom_tools.html', context={
+        'request': request,
+        'config': config,
+        't': translations.get(get_lang(request), translations['en']),
+        'lang': get_lang(request)
+    })
+
+
+@app.post('/admin/custom-tools', response_class=HTMLResponse)
+def admin_custom_tools_submit(request: Request,
+                              action: str = Form(...),
+                              eula_title: str = Form(None),
+                              eula_intro: str = Form(None),
+                              eula_content: str = Form(None),
+                              notification_title: str = Form(None),
+                              notification_message: str = Form(None),
+                              notification_start: str = Form(None),
+                              notification_end: str = Form(None),
+                              notification_one_time: str = Form(None),
+                              tip_text: str = Form(None),
+                              mode_select: str = Form(None)):
+    if 'user' not in request.session or not is_session_admin(request):
+        return RedirectResponse('/login')
+    config = load_admin_config()
+    if action == 'save_eula':
+        # Save current EULA to history before updating
+        current_eula = config.get('eula', {})
+        if current_eula:  # Only save to history if there's an existing EULA
+            if 'eula_history' not in config:
+                config['eula_history'] = []
+            config['eula_history'].append({
+                'title': current_eula.get('title', 'EULA'),
+                'intro': current_eula.get('intro', ''),
+                'content': current_eula.get('content', ''),
+                'saved_at': datetime.now().isoformat(),
+                'version': len(config['eula_history']) + 1
+            })
+        # Update current EULA
+        config['eula'] = {
+            'title': eula_title or 'EULA',
+            'intro': eula_intro or '',
+            'content': eula_content or ''
+        }
+        save_admin_config(config)
+    elif action == 'restore_eula':
+        # Restore EULA from history
+        version = int(eula_title) if eula_title else None
+        if version and 'eula_history' in config and 1 <= version <= len(config['eula_history']):
+            restored = config['eula_history'][version - 1]
+            # Save current to history before restoring
+            current_eula = config.get('eula', {})
+            if current_eula:
+                if 'eula_history' not in config:
+                    config['eula_history'] = []
+                config['eula_history'].append({
+                    'title': current_eula.get('title', 'EULA'),
+                    'intro': current_eula.get('intro', ''),
+                    'content': current_eula.get('content', ''),
+                    'saved_at': datetime.now().isoformat(),
+                    'version': len(config['eula_history']) + 1
+                })
+            # Restore selected version
+            config['eula'] = {
+                'title': restored['title'],
+                'intro': restored['intro'],
+                'content': restored['content']
+            }
+            save_admin_config(config)
+    elif action == 'add_notification':
+        new_n = {
+            'id': int(time.time()),
+            'title': notification_title or 'Obavijest',
+            'message': notification_message or '',
+            'start_date': notification_start or '',
+            'end_date': notification_end or '',
+            'one_time': bool(notification_one_time),
+            'created_at': datetime.now().isoformat()
+        }
+        config.setdefault('notifications', []).append(new_n)
+        save_admin_config(config)
+    elif action == 'add_tip':
+        if tip_text:
+            config.setdefault('tips', []).append({'id': int(time.time()), 'text': tip_text, 'created_at': datetime.now().isoformat()})
+            save_admin_config(config)
+    elif action == 'set_mode':
+        if mode_select in ['debug', 'maintenance', 'production']:
+            old = config.get('system_mode', 'production')
+            config['system_mode'] = mode_select
+            config.setdefault('mode_history', []).append({'from': old, 'to': mode_select, 'at': datetime.now().isoformat()})
+            save_admin_config(config)
+    return RedirectResponse('/admin/custom-tools', status_code=303)
+
+
 @app.get("/signup", response_class=HTMLResponse)
 def signup_page(request: Request):
     lang = get_lang(request)
@@ -1835,7 +2048,80 @@ def eula_page(request: Request):
     lang = get_lang(request)
     t_dict = translations.get(lang, translations['en'])
     show = is_session_admin(request)
-    return templates.TemplateResponse(request=request, name="eula.html", context={"request": request, "t": t_dict, "lang": lang, "show_devtools": show})
+    config = load_admin_config()
+    eula_cfg = config.get('eula', {})
+    # merge admin-config values with translations
+    if eula_cfg:
+        t_dict = t_dict.copy()
+        t_dict['EULA_title'] = eula_cfg.get('title', t_dict.get('EULA_title', 'EULA'))
+        t_dict['EULA_intro'] = eula_cfg.get('intro', t_dict.get('EULA_intro', ''))
+        t_dict['EULA_agreement'] = eula_cfg.get('content', t_dict.get('EULA_agreement', ''))
+    return templates.TemplateResponse(request=request, name="eula.html", context={"request": request, "t": t_dict, "lang": lang, "show_devtools": show, "config_eula": eula_cfg})
+
+
+@app.get('/auth/{provider}')
+async def oauth_login(request: Request, provider: str):
+    if provider not in ['google', 'microsoft', 'apple', 'facebook']:
+        raise HTTPException(status_code=400, detail='Unsupported provider')
+    client = oauth.create_client(provider)
+    redirect_uri = request.url_for('oauth_callback', provider=provider)
+    return await client.authorize_redirect(request, redirect_uri)
+
+
+@app.get('/auth/{provider}/callback')
+async def oauth_callback(request: Request, provider: str):
+    if provider not in ['google', 'microsoft', 'apple', 'facebook']:
+        raise HTTPException(status_code=400, detail='Unsupported provider')
+    client = oauth.create_client(provider)
+    token = await client.authorize_access_token(request)
+
+    if provider == 'google':
+        user_info = await client.parse_id_token(request, token)
+        email = user_info.get('email')
+        username = user_info.get('email', '').split('@')[0]
+        name = user_info.get('name') or ''
+    elif provider == 'microsoft':
+        user_info = await client.parse_id_token(request, token)
+        email = user_info.get('email') or user_info.get('preferred_username')
+        username = user_info.get('preferred_username', '').split('@')[0]
+        name = user_info.get('name') or ''
+    elif provider == 'apple':
+        id_token = token.get('id_token')
+        if not id_token:
+            raise HTTPException(status_code=400, detail='Apple did not return id_token')
+        import base64
+        payload = id_token.split('.')[1]
+        payload += '=' * ((4 - len(payload) % 4) % 4)
+        decoded = base64.urlsafe_b64decode(payload)
+        user_info = json.loads(decoded)
+        email = user_info.get('email')
+        username = email.split('@')[0] if email else 'apple_user'
+        name = user_info.get('name', '')
+
+    elif provider == 'facebook':
+        access_token = token.get('access_token')
+        async with httpx.AsyncClient() as client_http:
+            resp = await client_http.get('https://graph.facebook.com/me', params={'fields': 'id,name,email', 'access_token': access_token})
+            user_info = resp.json()
+        email = user_info.get('email')
+        username = f"fb_{user_info.get('id')}"
+        name = user_info.get('name') or ''
+
+    if not email:
+        raise HTTPException(status_code=400, detail='Unable to retrieve email from provider')
+
+    user = db.get_user_by_email(email)
+    if not user:
+        # create user with random password placeholder
+        pwd = f"oauth_{provider}_{random.randint(100000,999999)}"
+        hashed_password = pwd_context.hash(pwd)
+        user_id = db.add_user(username=username, password_hash=hashed_password, name=name, email=email, phone='', country='HR', user_type='user')
+        user = db.get_user_by_id(user_id)
+
+    request.session['user_id'] = user['id'] if isinstance(user, dict) else user[0]
+    request.session['username'] = user.get('username', username) if isinstance(user, dict) else username
+
+    return RedirectResponse(url='/', status_code=302)
 
 
 @app.get("/login", response_class=HTMLResponse)
@@ -2239,12 +2525,22 @@ def eco_score_page(request: Request, period: str = Query('week', alias='range'))
     if not user:
         return RedirectResponse('/login')
     u = dict(user) if not isinstance(user, dict) else user
-    data = api_user_eco_scores(request, u.get('id'), period)
+    scores_data = api_user_eco_scores(request, u.get('id'), period)
+    metrics = get_user_metrics(u)
     show_devtools = is_session_admin(request)
     lang = get_lang(request)
     t = translations[lang]
-    if isinstance(data, dict) and data.get('scores') is not None:
-        return templates.TemplateResponse(request=request, name='eco_score.html', context={'request': request, 'user': u, 'range': period, 'scores': data.get('scores'), 'show_devtools': show_devtools, 't': t, 'lang': lang})
+    if isinstance(scores_data, dict) and scores_data.get('scores') is not None:
+        return templates.TemplateResponse(request=request, name='eco_score.html', context={
+            'request': request,
+            'user': u,
+            'range': period,
+            'scores': scores_data.get('scores'),
+            'metrics': metrics,
+            'show_devtools': show_devtools,
+            't': t,
+            'lang': lang
+        })
     return RedirectResponse('/?msg=Error+loading+data')
 
 
@@ -2375,7 +2671,33 @@ def admin_activities(request: Request):
                 activities.append({'id': rrow[0], 'user_id': rrow[1], 'username': rrow[2], 'category': rrow[3], 'subtype': rrow[4], 'co2_kg': rrow[5], 'quantity': rrow[6], 'unit': rrow[7], 'note': rrow[8], 'created_at': rrow[9]})
     except Exception:
         activities = []
-    return templates.TemplateResponse(request=request, name='admin_activities.html', context={'request': request, 'activities': activities})
+    config = load_admin_config()
+    # Format mode history dates
+    if 'mode_history' in config:
+        for h in config['mode_history']:
+            if 'at' in h and h['at']:
+                try:
+                    dt = datetime.fromisoformat(h['at'].replace('Z', '+00:00'))
+                    h['formatted_at'] = dt.strftime('%d.%m.%Y %H:%M:%S')
+                except:
+                    h['formatted_at'] = h['at']
+            else:
+                h['formatted_at'] = ''
+    return templates.TemplateResponse(request=request, name='admin_activities.html', context={'request': request, 'activities': activities, 'config': config, 't': translations.get(get_lang(request), translations['en']), 'lang': get_lang(request)})
+
+
+@app.post('/admin/activities')
+def admin_activities_submit(request: Request, mode_select: str = Form(...)):
+    r = require_admin(request)
+    if r:
+        return r
+    config = load_admin_config()
+    if mode_select in ['debug', 'maintenance', 'production']:
+        old = config.get('system_mode', 'production')
+        config['system_mode'] = mode_select
+        config.setdefault('mode_history', []).append({'from': old, 'to': mode_select, 'at': datetime.now().isoformat()})
+        save_admin_config(config)
+    return RedirectResponse('/admin/activities', status_code=303)
 
 
 @app.post('/admin/activities/{activity_id}/delete')
@@ -2466,55 +2788,54 @@ def admin_apply_eco_score(request: Request, user_id: int, points: int = Form(...
 
 @app.get('/api/admin/activity-types')
 def api_admin_activity_types(request: Request):
-    """Get all activity types (category/subtype combinations) with their eco_score stats"""
+    """Get all emission factors with their eco_score statistics"""
     r = require_api_admin(request)
     if r:
         return r
     try:
-        all_activities = db.get_all_activities(limit=100000)
+        # Get all defined emission factors
+        all_factors = db.list_emission_factors()
         
-        # Group by category and subtype
-        activity_types = {}
-        for act in all_activities:
+        # For each factor, calculate eco_score stats from activities
+        result = []
+        for factor in all_factors:
             try:
-                a = dict(act) if not isinstance(act, dict) else act
-                category = a.get('category', 'Unknown')
-                subtype = a.get('subtype', 'Unknown')
-                eco_score = float(a.get('eco_score') or 0)
+                factor_dict = dict(factor)
+                category = factor_dict.get('category')
+                subtype = factor_dict.get('subtype')
                 
-                key = f"{category}::{subtype}"
-                if key not in activity_types:
-                    activity_types[key] = {
-                        'category': category,
-                        'subtype': subtype,
-                        'eco_scores': [],
-                        'count': 0
-                    }
+                # Get all activities of this type
+                all_activities = db.get_all_activities(limit=100000)
+                eco_scores = []
+                count = 0
                 
-                # Include all eco_scores, including 0s, for proper min/max/avg calculation
-                activity_types[key]['eco_scores'].append(eco_score)
-                activity_types[key]['count'] += 1
+                for act in all_activities:
+                    try:
+                        a = dict(act) if not isinstance(act, dict) else act
+                        if a.get('category') == category and a.get('subtype') == subtype:
+                            eco_score = float(a.get('eco_score') or 0)
+                            eco_scores.append(eco_score)
+                            count += 1
+                    except Exception:
+                        continue
+                
+                # Calculate statistics
+                avg_eco = sum(eco_scores) / len(eco_scores) if eco_scores else 0
+                min_eco = min(eco_scores) if eco_scores else 0
+                max_eco = max(eco_scores) if eco_scores else 0
+                
+                result.append({
+                    'category': category,
+                    'subtype': subtype,
+                    'count': count,
+                    'avg_eco_score': round(avg_eco, 3),
+                    'min_eco_score': round(min_eco, 2),
+                    'max_eco_score': round(max_eco, 2)
+                })
             except Exception:
                 continue
         
-        # Calculate average and stats
-        result = []
-        for key, data in activity_types.items():
-            eco_scores = data['eco_scores']
-            avg_eco = sum(eco_scores) / len(eco_scores) if eco_scores else 0
-            min_eco = min(eco_scores) if eco_scores else 0
-            max_eco = max(eco_scores) if eco_scores else 0
-            
-            result.append({
-                'category': data['category'],
-                'subtype': data['subtype'],
-                'count': data['count'],
-                'avg_eco_score': round(avg_eco, 3),
-                'min_eco_score': round(min_eco, 2),
-                'max_eco_score': round(max_eco, 2)
-            })
-        
-        return {"activity_types": sorted(result, key=lambda x: (x['category'], x['subtype']))}
+        return {"activity_types": result}
     except Exception as e:
         return {"error": str(e)}
 

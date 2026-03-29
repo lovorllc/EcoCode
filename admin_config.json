@@ -1,0 +1,120 @@
+{
+  "eula": {
+    "title": "Uvjeti korištenja 🌿",
+    "intro": "",
+    "content": ""
+  },
+  "notifications": [
+    {
+      "id": 1774824645,
+      "title": "TEst",
+      "message": "Testtt",
+      "start_date": "",
+      "end_date": "",
+      "one_time": true,
+      "created_at": "2026-03-30T00:50:45.771480"
+    },
+    {
+      "id": 1774824672,
+      "title": "d",
+      "message": "d",
+      "start_date": "",
+      "end_date": "",
+      "one_time": true,
+      "created_at": "2026-03-30T00:51:12.470756"
+    },
+    {
+      "id": 1774824840,
+      "title": "test",
+      "message": "debug",
+      "start_date": "2026-03-30",
+      "end_date": "2026-03-31",
+      "one_time": false,
+      "created_at": "2026-03-30T00:54:00.774667"
+    }
+  ],
+  "tips": [],
+  "system_mode": "production",
+  "mode_history": [
+    {
+      "from": "production",
+      "to": "maintenance",
+      "at": "2026-03-30T00:52:21.364564"
+    },
+    {
+      "from": "maintenance",
+      "to": "debug",
+      "at": "2026-03-30T00:52:43.719381"
+    },
+    {
+      "from": "debug",
+      "to": "production",
+      "at": "2026-03-30T00:53:09.640926"
+    }
+  ],
+  "eula_history": [
+    {
+      "title": "EULA",
+      "intro": "",
+      "content": "",
+      "saved_at": "2026-03-30T00:56:29.944270",
+      "version": 1
+    },
+    {
+      "title": "EULA",
+      "intro": "",
+      "content": "",
+      "saved_at": "2026-03-30T00:56:43.143937",
+      "version": 2
+    },
+    {
+      "title": "EULA",
+      "intro": "",
+      "content": "",
+      "saved_at": "2026-03-30T00:57:10.604587",
+      "version": 3
+    },
+    {
+      "title": "EULA",
+      "intro": "testing",
+      "content": "akooo\r\nje to oto-\r\n1. a",
+      "saved_at": "2026-03-30T00:57:32.830136",
+      "version": 4
+    },
+    {
+      "title": "EULA",
+      "intro": "",
+      "content": "",
+      "saved_at": "2026-03-30T00:57:48.704449",
+      "version": 5
+    },
+    {
+      "title": "Uvjeti korištenja 🌿",
+      "intro": "",
+      "content": "",
+      "saved_at": "2026-03-30T00:58:00.613220",
+      "version": 6
+    },
+    {
+      "title": "Uvjeti korištenja 🌿",
+      "intro": "",
+      "content": "1. Vlasništvo i licenca\r\nEcoCode je autorsko djelo i intelektualno vlasništvo unutar NLimit platforme. Korisniku se dodjeljuje pravo na osobno, nekomercijalno korištenje platforme u svrhe osvještavanja ekološke održivosti. Bilo kakav pokušaj neovlaštenog pristupa bazi podataka, modifikacija izvornog koda ili zlouporaba NLimit tehnologije strogo je zabranjena.\r\n\r\n2. Privatnost i GPS praćenje\r\nZa pružanje preciznog izračuna, aplikacija koristi GPS koordinate korisnika isključivo za mjerenje prijeđene udaljenosti. NLimit platforma se obvezuje da se podaci o lokaciji koriste isključivo za potrebe trenutnog izračuna emisija unutar aplikacije. Vaši podaci su privatni i neće biti ustupani trećim stranama bez vaše izričite privole.\r\n\r\n3. Metodologija i točnost podataka\r\nIzračuni emisija CO₂ unutar EcoCode servisa temelje se na općeprihvaćenim ekološkim koeficijentima (npr. prosječne emisije za putnička vozila). Ovi podaci služe kao informativni prikaz i edukativni alat. NLimit ne jamči apsolutnu znanstvenu preciznost te se ovi podaci ne smiju koristiti kao službeni certifikati u pravnim ili komercijalnim poslovima.\r\n\r\n4. Korisnički račun i sigurnost\r\nKorisnik je odgovoran za čuvanje tajnosti svojih pristupnih podataka. NLimit preporučuje korištenje jedinstvenih lozinki radi zaštite integriteta vašeg profila i povijesti izračuna.\r\n\r\n5. Ograničenje odgovornosti\r\nKorištenjem ovog servisa, korisnik prihvaća da NLimit platforma i njezini autori nisu odgovorni za bilo kakvu neizravnu štetu, gubitak podataka ili tehničke prekide u radu aplikacije. Servis se pruža \"onakav kakav jest\" u svrhu promicanja ekološke svijesti.\r\n\r\n6. Izmjene i budući razvoj\r\nZadržavamo pravo izmjene ovih uvjeta u skladu s tehničkim napretkom aplikacije ili promjenama u regulativama o zaštiti podataka. Budući da je EcoCode dio šireg NLimit ekosustava, korisnici će biti obaviješteni o svim značajnim nadogradnjama ili integracijama novih alata.",
+      "saved_at": "2026-03-30T00:58:08.853929",
+      "version": 7
+    },
+    {
+      "title": "EULA",
+      "intro": "",
+      "content": "",
+      "saved_at": "2026-03-30T01:03:41.663415",
+      "version": 8
+    },
+    {
+      "title": "EULA",
+      "intro": "",
+      "content": "<ul><li>46581</li></ul><br>\r\n<strong><em><span style=\"color: #10b981;\">hgvj</span></em></strong><br>\r\nkhbkhbkjb<a href=\"google.com\" style=\"color: #3b82f6; text-decoration: underline;\"></a><br>\r\n<li>65</li>",
+      "saved_at": "2026-03-30T01:04:25.921783",
+      "version": 9
+    }
+  ]
+}

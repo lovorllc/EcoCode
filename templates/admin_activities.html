@@ -180,25 +180,21 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Tip Loga</th>
-                                <th>Korisnik</th>
-                                <th>Status</th>
-                                <th>Vrijeme</th>
+                                <th>Tip Aktivnosti</th>
+                                <th>Detalji</th>
+                                <th>Mod Rada</th>
+                                <th>Datum i Vrijeme</th>
                             </tr>
                         </thead>
                         <tbody id="logsWrap">
+                            {% for h in config.mode_history|reverse %}
                             <tr>
-                                <td>DB_BACKUP</td>
-                                <td>System</td>
-                                <td><span class="status-badge">USPJEŠNO</span></td>
-                                <td>16:45:12</td>
+                                <td>PROMJENA MODA</td>
+                                <td>{{ h.from }} → {{ h.to }}</td>
+                                <td><span class="status-badge">{{ h.to|upper }}</span></td>
+                                <td>{{ h.formatted_at }}</td>
                             </tr>
-                            <tr>
-                                <td>API_AUTH</td>
-                                <td>Admin_Main</td>
-                                <td><span class="status-badge">USPJEŠNO</span></td>
-                                <td>16:40:05</td>
-                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -206,19 +202,23 @@
 
             <section class="glass-card">
                 <h3>Konfiguracija</h3>
-                <div class="input-group">
-                    <label>Mod Rada Sustava</label>
-                    <select>
-                        <option>Produkcija</option>
-                        <option>Održavanje</option>
-                        <option>Debug Mod</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>Globalna Obavijest</label>
-                    <input type="text" placeholder="Unesite tekst poruke...">
-                </div>
-                <button class="btn-action">Primijeni Postavke</button>
+                <form method="post" action="/admin/activities">
+                    <div class="input-group">
+                        <label>Mod Rada Sustava</label>
+                        <select name="mode_select" required>
+                            <option value="production" {% if config.system_mode == 'production' %}selected{% endif %}>Produkcija (normalno)</option>
+                            <option value="maintenance" {% if config.system_mode == 'maintenance' %}selected{% endif %}>Održavanje</option>
+                            <option value="debug" {% if config.system_mode == 'debug' %}selected{% endif %}>Debug (mogući problemi sa spremanjem)</option>
+                        </select>
+                    </div>
+                    <button class="btn-action">Ažuriraj mod</button>
+                </form>
+                <h4>Povijest promjena</h4>
+                <ul>
+                    {% for h in config.mode_history|reverse %}
+                        <li>{{ h.at }} : {{ h.from }} → {{ h.to }}</li>
+                    {% endfor %}
+                </ul>
             </section>
         </div>
     </main>

@@ -48,6 +48,13 @@
 
         * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 
+        select, input[type="select"], input, textarea {
+            border: 1px solid rgba(100, 116, 139, 0.35); padding: 10px 12px; border-radius: 10px;
+            background: var(--card-bg); color: var(--text-main); font-weight: 600;
+            outline: none;
+        }
+        select:focus, input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15); }
+
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
@@ -243,7 +250,12 @@
 
         <div class="glass-card">
             <h3 style="margin: 0; font-weight: 800; font-size: 1.3rem;">{{ t.Sustainability_Trend }}</h3>
-            <div class="chart-container">
+            <div style="display:flex; gap:14px; align-items:center; margin-top:12px;">
+                <label><input type="checkbox" id="showScore" checked> {{ t.Eco_Score }}</label>
+                <label><input type="checkbox" id="showCO2" checked> CO₂</label>
+                <label><input type="checkbox" id="showSaved" checked> Ušteda</label>
+            </div>
+            <div class="chart-container" style="position:relative;">
                 <canvas id="scoreChart"></canvas>
             </div>
         </div>
@@ -269,10 +281,12 @@
 
         function closePopup() { document.getElementById('eco-popup').classList.remove('active'); }
 
-        // Get scores data from backend
+        // Get scores and metrics data from backend
         const scores = {{ scores|tojson }};
+        const metrics = {{ metrics|tojson }};
         const latestScore = scores.length > 0 ? scores[scores.length - 1].score : 0;
-        const totalCo2 = scores.reduce((sum, s) => sum + s.co2, 0);
+        const totalCo2 = metrics.last7 ? metrics.last7.reduce((sum, x) => sum + (x.emitted_kg || 0), 0) : 0;
+
         let statusText = window.t.No_data;
         let statusColor = 'var(--accent)';
         if (latestScore >= 80) {
@@ -289,50 +303,56 @@
             statusColor = '#ef4444';
         }
 
-        // Set values
         document.getElementById('latest-score-val').innerHTML = `${latestScore}<small>/ 100</small>`;
         document.getElementById('co2-saved-val').innerHTML = `${totalCo2.toFixed(1)}<small>kg</small>`;
         const statusBadge = document.getElementById('status-badge');
         statusBadge.textContent = statusText;
         statusBadge.style.background = statusColor;
 
-        // Prepare chart data
-        const labels = scores.map(s => new Date(s.date).toLocaleDateString('hr-HR', { month: 'short', day: 'numeric' }));
-        const data = scores.map(s => s.score);
+        const labels = metrics.last7 ? metrics.last7.map(x => new Date(x.date).toLocaleDateString('hr-HR', { month: 'short', day: 'numeric' })) : [];
+        const ecoData = scores.map(s => s.score);
+        const co2Data = metrics.last7 ? metrics.last7.map(x => x.emitted_kg || 0) : [];
+        const savedData = metrics.last7 ? metrics.last7.map(x => x.saved_kg || 0) : [];
 
         const ctx = document.getElementById('scoreChart').getContext('2d');
-        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, isDark ? 'rgba(52, 211, 153, 0.4)' : 'rgba(16, 185, 129, 0.3)');
-        gradient.addColorStop(1, 'transparent');
 
-        new Chart(ctx, {
+        const config = {
             type: 'line',
             data: {
                 labels: labels,
-                datasets: [{
-                    data: data,
-                    borderColor: '#10b981',
-                    borderWidth: 4,
-                    pointBackgroundColor: '#ffffff',
-                    pointRadius: 5,
-                    tension: 0.4,
-                    fill: true,
-                    backgroundColor: gradient
-                }]
+                datasets: [
+                    { label: 'Eco score', data: ecoData, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.25)', tension: 0.35, fill: true, yAxisID: 'y2' },
+                    { label: 'CO₂', data: co2Data, borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.2)', tension: 0.35, fill: true, yAxisID: 'y' },
+                    { label: 'Ušteda', data: savedData, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.2)', tension: 0.35, fill: true, yAxisID: 'y' }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: {
+                    legend: { display: true },
+                    tooltip: { mode: 'index', intersect: false }
+                },
                 scales: {
-                    y: { 
-                        grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
-                        ticks: { color: isDark ? '#94a3b8' : '#64748b' }
-                    },
+                    y: { type: 'linear', position: 'left', title: { display: true, text: 'kg CO₂' }, grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }, ticks: { color: isDark ? '#94a3b8' : '#64748b' } },
+                    y2: { type: 'linear', position: 'right', title: { display: true, text: 'Eco Score' }, min: 0, max: 100, grid: { drawOnChartArea: false }, ticks: { color: isDark ? '#94a3b8' : '#64748b' } },
                     x: { grid: { display: false }, ticks: { color: isDark ? '#94a3b8' : '#64748b' } }
                 }
             }
-        });
+        };
+
+        const scoreChart = new Chart(ctx, config);
+
+        function updateChartVisibility() {
+            scoreChart.data.datasets[0].hidden = !document.getElementById('showScore').checked;
+            scoreChart.data.datasets[1].hidden = !document.getElementById('showCO2').checked;
+            scoreChart.data.datasets[2].hidden = !document.getElementById('showSaved').checked;
+            scoreChart.update();
+        }
+
+        document.getElementById('showScore').addEventListener('change', updateChartVisibility);
+        document.getElementById('showCO2').addEventListener('change', updateChartVisibility);
+        document.getElementById('showSaved').addEventListener('change', updateChartVisibility);
 
         setTimeout(() => document.getElementById('eco-popup').classList.add('active'), 3000);
     </script>

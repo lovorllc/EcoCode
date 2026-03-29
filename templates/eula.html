@@ -235,27 +235,31 @@
             <h1>{{ t.EULA_title }}</h1>
             <span class="last-updated">{{ t.EULA_updated }}</span>
 
-            <p>{{ t.EULA_intro }}</p>
+            <p>{{ config_eula.intro or t.EULA_intro }}</p>
 
-            <p>{{ t.EULA_agreement }}</p>
+            {% if config_eula.content %}
+                <div style="color: var(--text-soft); line-height: 1.6;">{{ config_eula.content|safe }}</div>
+            {% else %}
+                <p>{{ t.EULA_agreement }}</p>
 
-            <h3>{{ t.EULA_section1_title }}</h3>
-            <p>{{ t.EULA_section1_content }}</p>
+                <h3>{{ t.EULA_section1_title }}</h3>
+                <p>{{ t.EULA_section1_content }}</p>
 
-            <h3>{{ t.EULA_section2_title }}</h3>
-            <p>{{ t.EULA_section2_content }}</p>
+                <h3>{{ t.EULA_section2_title }}</h3>
+                <p>{{ t.EULA_section2_content }}</p>
 
-            <h3>{{ t.EULA_section3_title }}</h3>
-            <p>{{ t.EULA_section3_content }}</p>
+                <h3>{{ t.EULA_section3_title }}</h3>
+                <p>{{ t.EULA_section3_content }}</p>
 
-            <h3>{{ t.EULA_section4_title }}</h3>
-            <p>{{ t.EULA_section4_content }}</p>
+                <h3>{{ t.EULA_section4_title }}</h3>
+                <p>{{ t.EULA_section4_content }}</p>
 
-            <h3>{{ t.EULA_section5_title }}</h3>
-            <p>{{ t.EULA_section5_content }}</p>
+                <h3>{{ t.EULA_section5_title }}</h3>
+                <p>{{ t.EULA_section5_content }}</p>
 
-            <h3>{{ t.EULA_section6_title }}</h3>
-            <p>{{ t.EULA_section6_content }}</p>
+                <h3>{{ t.EULA_section6_title }}</h3>
+                <p>{{ t.EULA_section6_content }}</p>
+            {% endif %}
 
             <a href="/signup" class="btn-back">{{ t.EULA_button }}</a>
         </div>

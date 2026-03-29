@@ -42,6 +42,13 @@
 
         * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
+        select, input[type="select"], input, textarea {
+            border: 1px solid rgba(100, 116, 139, 0.35); padding: 10px 12px; border-radius: 10px;
+            background: var(--card-bg); color: var(--text-main); font-weight: 600;
+            outline: none;
+        }
+        select:focus, input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15); }
+
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
@@ -299,6 +306,12 @@
                 <span class="settings-icon">📜</span>
                 <h3>{{ t.EULA }}</h3>
                 <p>{{ t.View_terms }}</p>
+            </a>
+
+            <a href="/about" class="settings-card">
+                <span class="settings-icon">ℹ️</span>
+                <h3>O aplikaciji</h3>
+                <p>Više informacija o aplikaciji i autorizaciji.</p>
             </a>
         </div>
     </main>

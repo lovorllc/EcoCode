@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Alati - Upravljačka ploča</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* SVJETLA ECO TEMA */
+            --bg: #f8fafc;
+            --accent: #10b981;
+            --accent-dark: #059669;
+            --text-main: #0f172a;
+            --text-soft: #64748b;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(16, 185, 129, 0.2);
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+            --input-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        [data-theme="dark"] {
+            /* TAMNA ECO GLASS TEMA */
+            --bg: #0f172a;
+            --accent: #34d399;
+            --accent-dark: #10b981;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --text-main: #f8fafc;
+            --text-soft: #94a3b8;
+            --glass-border: rgba(52, 211, 153, 0.15);
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            --input-bg: rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="neon"] {
+            --bg: #0f172a;
+            --accent: #0fea88;
+            --accent-dark: #0fa060;
+            --card-bg: rgba(15, 23, 42, 0.6);
+            --text-main: #e2e8f0;
+            --text-soft: #cbd5e1;
+            --glass-border: rgba(15, 234, 136, 0.25);
+            --shadow: 0 0 10px rgba(15, 234, 136, 0.15), inset 0 1px 0 rgba(15, 234, 136, 0.1);
+            --input-bg: rgba(0, 0, 0, 0.3);
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            background-color: var(--bg);
+            background-image:
+                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(5, 150, 105, 0.08) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        main { max-width: 1100px; margin: 40px auto; padding: 18px; }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            padding: 10px 16px;
+            border-radius: 14px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            backdrop-filter: blur(16px);
+        }
+        .nav a { color: var(--text-main); text-decoration: none; font-weight: 700; }
+
+        .panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 30px;
+            margin-bottom: 18px;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+        .panel::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 30px;
+            right: 30px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        .panel h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-weight: 800;
+            color: var(--text-main);
+            font-size: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 4px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        input[type=text], input[type=url], textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            background: var(--input-bg);
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type=text]:focus, input[type=url]:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .format-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .format-btn {
+            padding: 8px 12px;
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text-main);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .format-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .hint {
+            color: var(--text-soft);
+            font-size: 0.86rem;
+            margin-top: 5px;
+        }
+
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            margin-top: 20px;
+        }
+
+        .table th, .table td {
+            border: 1px solid var(--glass-border);
+            padding: 12px;
+        }
+
+        .table th {
+            background: rgba(16, 185, 129, 0.1);
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .table td {
+            color: var(--text-main);
+        }
+
+        .current-version {
+            background: rgba(16, 185, 129, 0.1) !important;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="nav">
+            <a href="/devtools">← Nazad na Admin Dashboard</a>
+            <span>Admin kontrolni panel</span>
+        </div>
+
+        <div class="panel">
+            <h2>EULA Editor</h2>
+            <form method="post" action="/admin/custom-tools">
+                <input type="hidden" name="action" value="save_eula" />
+                <label>Naslov</label>
+                <input type="text" name="eula_title" value="{{ config.eula.title or 'EULA' }}" />
+
+                <label>Uvod</label>
+                <textarea name="eula_intro" rows="3" placeholder="Uvodni tekst...">{{ config.eula.intro or '' }}</textarea>
+
+                <label>Sadržaj (podržava HTML)</label>
+                <div class="format-buttons">
+                    <button type="button" class="format-btn" onclick="insertTag('content', '<strong>', '</strong>')">Bold</button>
+                    <button type="button" class="format-btn" onclick="insertTag('content', '<em>', '</em>')">Italic</button>
+                    <button type="button" class="format-btn" onclick="insertTag('content', '<span style=&quot;color: #10b981;&quot;>', '</span>')">Zelena boja</button>
+                    <button type="button" class="format-btn" onclick="insertTag('content', '<span style=&quot;color: #3b82f6;&quot;>', '</span>')">Plava boja</button>
+                    <button type="button" class="format-btn" onclick="insertTag('content', '<span style=&quot;color: #ef4444;&quot;>', '</span>')">Crvena boja</button>
+                    <button type="button" class="format-btn" onclick="insertLink('content')">Hiperveza</button>
+                    <button type="button" class="format-btn" onclick="insertTag('content', '<ul><li>', '</li></ul>')">Bullet lista</button>
+                    <button type="button" class="format-btn" onclick="insertTag('content', '<li>', '</li>')">Bullet točka</button>
+                    <button type="button" class="format-btn" onclick="insertTag('content', '<br>', '')">Novi red</button>
+                </div>
+                <textarea id="content" name="eula_content" rows="12" placeholder="Sadržaj EULA-e s HTML formatiranjem...">{{ config.eula.content or '' }}</textarea>
+                <p class="hint">Koristite dugmad iznad za formatiranje teksta. Podržava HTML tagove za boje, linkove i liste.</p>
+                <button type="submit">Spremi EULA</button>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h2>Povijest EULA verzija</h2>
+            <p class="hint">Trenutna verzija i sve prethodne verzije EULA dokumenta.</p>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Verzija</th>
+                        <th>Naslov</th>
+                        <th>Spremljeno</th>
+                        <th>Akcije</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="current-version">
+                        <td><strong>TRENUĆNA</strong></td>
+                        <td>{{ config.eula.title or 'EULA' }}</td>
+                        <td>-</td>
+                        <td><em>Aktivna verzija</em></td>
+                    </tr>
+                    {% for h in config.eula_history|reverse %}
+                    <tr>
+                        <td>{{ h.version }}</td>
+                        <td>{{ h.title }}</td>
+                        <td>{{ h.formatted_saved_at }}</td>
+                        <td>
+                            <form method="post" action="/admin/custom-tools" style="display:inline;">
+                                <input type="hidden" name="action" value="restore_eula" />
+                                <input type="hidden" name="eula_title" value="{{ h.version }}" />
+                                <button type="submit" onclick="return confirm('Da li ste sigurni da želite vratiti ovu verziju EULA-a?')">Vrati</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="panel">
+            <h2>Pop-up Obavijesti</h2>
+            <form method="post" action="/admin/custom-tools">
+                <input type="hidden" name="action" value="add_notification" />
+                <label>Naslov</label>
+                <input type="text" name="notification_title" placeholder="Novo obavijest" required />
+                <label>Poruka</label>
+                <textarea name="notification_message" rows="3" placeholder="Napišite poruku..."></textarea>
+                <label>Početak</label>
+                <input type="date" name="notification_start" />
+                <label>Kraj</label>
+                <input type="date" name="notification_end" />
+                <label><input type="checkbox" name="notification_one_time" value="1" /> Jednokratna obavijest</label>
+                <p class="hint">If no date is set, it will be always active.</p>
+                <button type="submit">Dodaj obavijest</button>
+            </form>
+            <h4>Postojeće obavijesti</h4>
+            <table class="table">
+                <thead><tr><th>ID</th><th>Naslov</th><th>Poruka</th><th>Period</th><th>Jednokratna</th></tr></thead>
+                <tbody>
+                    {% for n in config.notifications %}
+                        <tr>
+                            <td>{{ n.id }}</td>
+                            <td>{{ n.title }}</td>
+                            <td>{{ n.message }}</td>
+                            <td>{{ n.start_date or 'sada' }} - {{ n.end_date or 'neograničeno' }}</td>
+                            <td>{{ 'Da' if n.one_time else 'Ne' }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="panel">
+            <h2>Savjeti</h2>
+            <form method="post" action="/admin/custom-tools">
+                <input type="hidden" name="action" value="add_tip" />
+                <label>Tekst savjeta</label>
+                <textarea name="tip_text" rows="2" placeholder="Novi savjet"></textarea>
+                <button type="submit">Dodaj savjet</button>
+            </form>
+            <h4>Lista savjeta</h4>
+            <ul>
+                {% for tip in config.tips %}
+                    <li>{{ tip.text }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+    </main>
+
+    <script>
+        // Sinhronizacija teme s localStorage
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+        // Funkcije za formatiranje teksta
+        function insertTag(textareaId, openTag, closeTag) {
+            const textarea = document.getElementById(textareaId);
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            const beforeText = textarea.value.substring(0, start);
+            const afterText = textarea.value.substring(end);
+
+            textarea.value = beforeText + openTag + selectedText + closeTag + afterText;
+            textarea.focus();
+            textarea.setSelectionRange(start + openTag.length, start + openTag.length + selectedText.length);
+        }
+
+        function insertLink(textareaId) {
+            const url = prompt('Unesite URL hiperveze:');
+            if (url) {
+                const linkText = prompt('Unesite tekst linka:');
+                if (linkText) {
+                    insertTag(textareaId, '<a href="' + url + '" style="color: #3b82f6; text-decoration: underline;">', '</a>');
+                }
+            }
+        }
+
+        console.log("Admin alati spremni u temi: " + savedTheme);
+    </script>
+</body>
+</html>

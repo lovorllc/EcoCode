@@ -48,6 +48,13 @@
 
         * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 
+        select, input[type="select"], input, textarea {
+            border: 1px solid rgba(100, 116, 139, 0.35); padding: 10px 12px; border-radius: 10px;
+            background: var(--card-bg); color: var(--text-main); font-weight: 600;
+            outline: none;
+        }
+        select:focus, input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15); }
+
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             margin: 0; 
@@ -334,6 +341,11 @@
             {% endif %}
         </div>
     </nav>
+    {% if system_mode and system_mode != 'production' %}
+    <div style="width:100%; background:#fef3c7; border:1px solid #f59e0b; color:#92400e; text-align:center; padding:10px 0; font-weight:700;">
+        SUSTAV JE U MODU: {{ system_mode|upper }}. {% if system_mode == 'maintenance' %}Održavanje je u tijeku, dio funkcionalnosti može biti ograničen.{% elif system_mode == 'debug' %}Debug upozorenje: može doći do problema sa spremanjem podataka.{% endif %}
+    </div>
+    {% endif %}
 
     <main>
         {% if user %}
@@ -501,8 +513,64 @@
                 document.getElementById('dash-saved').innerHTML = (metrics.today_saved || 0).toFixed(2) + '<small>kg</small>';
                 document.getElementById('dash-score').textContent = metrics.eco_score || 0;
                 document.getElementById('streak-val').textContent = '🔥 ' + (metrics.streak_days || 0);
+                renderHomeChart(metrics.last7 || []);
+                displayActivePopups();
             } catch (e) { console.error(e); }
         }
+
+        function renderHomeChart(weekData) {
+            const container = document.getElementById('chart');
+            if (!container) return;
+            if (!weekData || weekData.length === 0) {
+                container.innerHTML = '<p style="width:100%;text-align:center;color:#64748b">Nema podataka za graf</p>';
+                return;
+            }
+            const values = weekData.map(d => Math.max(d.emitted_kg || 0, d.saved_kg || 0, Math.abs(d.net_kg || 0)));
+            const maxVal = Math.max(1, ...values);
+            container.innerHTML = '';
+            weekData.forEach(item => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'bar-wrapper';
+
+                const bar = document.createElement('div');
+                const height = Math.max(10, ((item.net_kg || 0) / maxVal) * 100);
+                bar.style.height = `${height}%`;
+                bar.style.background = item.net_kg <= 0 ? 'var(--accent)' : 'linear-gradient(180deg, #ef4444, #f97316)';
+                bar.className = 'bar';
+
+                const label = document.createElement('small');
+                label.textContent = new Date(item.date).toLocaleDateString('hr-HR', { month:'short', day:'numeric' });
+                label.style.marginTop = '8px';
+                label.style.fontSize = '0.75rem';
+                label.style.color = 'var(--text-soft)';
+
+                wrapper.appendChild(bar);
+                wrapper.appendChild(label);
+                container.appendChild(wrapper);
+            });
+        }
+
+        async function displayActivePopups() {
+            try {
+                const resp = await fetch('/api/notifications');
+                const data = await resp.json();
+                if (!data || !data.notifications) return;
+                if (data.notifications.length > 0) {
+                    const popup = document.getElementById('eco-popup');
+                    const first = data.notifications[0];
+                    popup.querySelector('h4').textContent = first.title || 'Obavijest';
+                    popup.querySelector('#pop-text').textContent = first.message || '';
+                    popup.classList.add('active');
+
+                    if (first.one_time) {
+                        setTimeout(() => popup.classList.remove('active'), 8000);
+                    }
+                }
+            } catch (e) {
+                console.warn('Obavijest nije učitana', e);
+            }
+        }
+
         window.onload = syncData;
         {% endif %}
 
