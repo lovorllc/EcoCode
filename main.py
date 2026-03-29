@@ -11,6 +11,28 @@ import sqlite3
 import httpx
 from passlib.context import CryptContext
 from database import Database
+
+
+def load_env_from_file(env_path='.env'):
+    if not os.path.exists(env_path):
+        return
+    try:
+        with open(env_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#') or '=' not in line:
+                    continue
+                key, value = line.split('=', 1)
+                key = key.strip()
+                value = value.strip().strip('"').strip("'")
+                if key and os.getenv(key) is None:
+                    os.environ[key] = value
+    except Exception:
+        pass
+
+
+# Load .env file if exists
+load_env_from_file('.env')
 from auth import router as auth_router
 from phone_utils import normalize_phone, COUNTRY_CHOICES, get_country_from_e164, example_for_country, DIAL_CODES
 from validators import validate_name, validate_username, validate_password, validate_phone
@@ -590,40 +612,74 @@ app.add_middleware(
 
 db = Database()
 
+
+DEFAULT_OAUTH_CREDENTIALS = {
+    'google': ('578326115915-v07fio7jjj0f9ijooi3gmq04mursrnma.apps.googleusercontent.com', ''),
+    'microsoft': ('', ''),
+    'apple': ('', ''),
+    'facebook': ('', '')
+}
+
+
+def oauth_env(key):
+    return os.getenv(key) or os.getenv(f'OAUTH_{key}', '')
+
+
+def get_oauth_provider_credentials(provider):
+    mapping = {
+        'google': ('GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'),
+        'microsoft': ('MICROSOFT_CLIENT_ID', 'MICROSOFT_CLIENT_SECRET'),
+        'apple': ('APPLE_CLIENT_ID', 'APPLE_CLIENT_SECRET'),
+        'facebook': ('FACEBOOK_CLIENT_ID', 'FACEBOOK_CLIENT_SECRET')
+    }
+    client_id_key, client_secret_key = mapping.get(provider, ('', ''))
+    client_id = oauth_env(client_id_key) or DEFAULT_OAUTH_CREDENTIALS.get(provider, ('', ''))[0]
+    client_secret = oauth_env(client_secret_key) or DEFAULT_OAUTH_CREDENTIALS.get(provider, ('', ''))[1]
+    return client_id, client_secret
+
+
 oauth = OAuth()
 
-oauth.register(
-    name='google',
-    client_id=os.getenv('GOOGLE_CLIENT_ID', ''),
-    client_secret=os.getenv('GOOGLE_CLIENT_SECRET', ''),
-    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_kwargs={'scope': 'openid email profile'}
-)
+google_id, google_secret = get_oauth_provider_credentials('google')
+if google_id:
+    oauth.register(
+        name='google',
+        client_id=google_id,
+        client_secret=google_secret,
+        server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+        client_kwargs={'scope': 'openid email profile'}
+    )
 
-oauth.register(
-    name='microsoft',
-    client_id=os.getenv('MICROSOFT_CLIENT_ID', ''),
-    client_secret=os.getenv('MICROSOFT_CLIENT_SECRET', ''),
-    server_metadata_url='https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration',
-    client_kwargs={'scope': 'openid email profile'}
-)
+microsoft_id, microsoft_secret = get_oauth_provider_credentials('microsoft')
+if microsoft_id:
+    oauth.register(
+        name='microsoft',
+        client_id=microsoft_id,
+        client_secret=microsoft_secret,
+        server_metadata_url='https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration',
+        client_kwargs={'scope': 'openid email profile'}
+    )
 
-oauth.register(
-    name='apple',
-    client_id=os.getenv('APPLE_CLIENT_ID', ''),
-    client_secret=os.getenv('APPLE_CLIENT_SECRET', ''),
-    server_metadata_url='https://appleid.apple.com/.well-known/openid-configuration',
-    client_kwargs={'scope': 'openid email name'}
-)
+apple_id, apple_secret = get_oauth_provider_credentials('apple')
+if apple_id:
+    oauth.register(
+        name='apple',
+        client_id=apple_id,
+        client_secret=apple_secret,
+        server_metadata_url='https://appleid.apple.com/.well-known/openid-configuration',
+        client_kwargs={'scope': 'openid email name'}
+    )
 
-oauth.register(
-    name='facebook',
-    client_id=os.getenv('FACEBOOK_CLIENT_ID', ''),
-    client_secret=os.getenv('FACEBOOK_CLIENT_SECRET', ''),
-    authorize_url='https://www.facebook.com/v12.0/dialog/oauth',
-    access_token_url='https://graph.facebook.com/v12.0/oauth/access_token',
-    client_kwargs={'scope': 'email public_profile'}
-)
+facebook_id, facebook_secret = get_oauth_provider_credentials('facebook')
+if facebook_id:
+    oauth.register(
+        name='facebook',
+        client_id=facebook_id,
+        client_secret=facebook_secret,
+        authorize_url='https://www.facebook.com/v12.0/dialog/oauth',
+        access_token_url='https://graph.facebook.com/v12.0/oauth/access_token',
+        client_kwargs={'scope': 'email public_profile'}
+    )
 
 ADMIN_CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'admin_config.json')
 
@@ -2063,7 +2119,29 @@ def eula_page(request: Request):
 async def oauth_login(request: Request, provider: str):
     if provider not in ['google', 'microsoft', 'apple', 'facebook']:
         raise HTTPException(status_code=400, detail='Unsupported provider')
-    client = oauth.create_client(provider)
+
+    provider_ok = {
+        'google': bool(get_oauth_provider_credentials('google')[0]),
+        'microsoft': bool(get_oauth_provider_credentials('microsoft')[0]),
+        'apple': bool(get_oauth_provider_credentials('apple')[0]),
+        'facebook': bool(get_oauth_provider_credentials('facebook')[0])
+    }
+
+    if not provider_ok.get(provider):
+        # Return gracefully with clear user message on login page.
+        from urllib.parse import urlencode
+        message = f'OAuth provider {provider} is not configured. Set environment variables (GOOGLE_CLIENT_ID / OAUTH_GOOGLE_CLIENT_ID etc.).'
+        query = urlencode({'error': message})
+        return RedirectResponse(f'/login?{query}', status_code=302)
+
+    try:
+        client = oauth.create_client(provider)
+    except Exception as e:
+        from urllib.parse import urlencode
+        message = f'Oauth provider setup issue for {provider}: {str(e)}'
+        query = urlencode({'error': message})
+        return RedirectResponse(f'/login?{query}', status_code=302)
+
     redirect_uri = request.url_for('oauth_callback', provider=provider)
     return await client.authorize_redirect(request, redirect_uri)
 
@@ -2110,16 +2188,27 @@ async def oauth_callback(request: Request, provider: str):
     if not email:
         raise HTTPException(status_code=400, detail='Unable to retrieve email from provider')
 
-    user = db.get_user_by_email(email)
+    user = db.get_user_by_login(email)
     if not user:
         # create user with random password placeholder
         pwd = f"oauth_{provider}_{random.randint(100000,999999)}"
         hashed_password = pwd_context.hash(pwd)
-        user_id = db.add_user(username=username, password_hash=hashed_password, name=name, email=email, phone='', country='HR', user_type='user')
-        user = db.get_user_by_id(user_id)
+        user_id = db.add_user(username=username, password_hash=hashed_password, name=name, email=email, phone='', user_type='user')
+        user = db.get_user(user_id)
 
-    request.session['user_id'] = user['id'] if isinstance(user, dict) else user[0]
-    request.session['username'] = user.get('username', username) if isinstance(user, dict) else username
+    if user is None:
+        raise HTTPException(status_code=500, detail='Unable to create or load user from OAuth provider')
+
+    # user could be sqlite3.Row or dict-like or tuple
+    if isinstance(user, dict):
+        request.session['user_id'] = user.get('id')
+        request.session['username'] = user.get('username', username)
+    elif hasattr(user, 'keys'):
+        request.session['user_id'] = user.get('id')
+        request.session['username'] = user.get('username', username)
+    else:
+        request.session['user_id'] = user[0]
+        request.session['username'] = user[1] if len(user) > 1 else username
 
     return RedirectResponse(url='/', status_code=302)
 
@@ -2128,7 +2217,22 @@ async def oauth_callback(request: Request, provider: str):
 def login_page(request: Request):
     lang = get_lang(request)
     t_dict = translations.get(lang, translations['en'])
-    return templates.TemplateResponse(request=request, name="login.html", context={"request": request, "t": t_dict, "lang": lang})
+    error = request.query_params.get('error')
+
+    oauth_config = {
+        'google': bool(get_oauth_provider_credentials('google')[0]) and bool(get_oauth_provider_credentials('google')[1]),
+        'microsoft': bool(get_oauth_provider_credentials('microsoft')[0]) and bool(get_oauth_provider_credentials('microsoft')[1]),
+        'apple': bool(get_oauth_provider_credentials('apple')[0]) and bool(get_oauth_provider_credentials('apple')[1]),
+        'facebook': bool(get_oauth_provider_credentials('facebook')[0]) and bool(get_oauth_provider_credentials('facebook')[1])
+    }
+
+    return templates.TemplateResponse(request=request, name="login.html", context={
+        "request": request,
+        "t": t_dict,
+        "lang": lang,
+        "error": error,
+        "oauth_config": oauth_config
+    })
 
 
 @app.post("/login")
