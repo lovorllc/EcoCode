@@ -24,7 +24,7 @@ class Database:
         with self.connect() as conn:
             cursor = conn.cursor()
 
-            # Ensure activities table has quantity and unit columns if missing (independent of users schema)
+            # Ensure activities table has quantity, unit, and eco_score columns if missing (independent of users schema)
             try:
                 cursor.execute("PRAGMA table_info(activities)")
                 a_cols = [row[1] for row in cursor.fetchall()]
@@ -37,6 +37,12 @@ class Database:
                 if 'unit' not in a_cols:
                     try:
                         cursor.execute("ALTER TABLE activities ADD COLUMN unit TEXT")
+                        conn.commit()
+                    except Exception:
+                        pass
+                if 'eco_score' not in a_cols:
+                    try:
+                        cursor.execute("ALTER TABLE activities ADD COLUMN eco_score REAL DEFAULT 0.0")
                         conn.commit()
                     except Exception:
                         pass

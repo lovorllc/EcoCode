@@ -512,15 +512,22 @@
 
         async function loadActivityTypes() {
             try {
+                console.log('Loading activity types...');
                 const response = await fetch('/api/admin/activity-types');
+                console.log('Response status:', response.status);
+                
                 const data = await response.json();
+                console.log('Response data:', data);
                 
                 if (data.error) {
+                    console.error('API Error:', data.error);
                     document.getElementById('activityTypesBody').innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444;">Greška: ${data.error}</td></tr>`;
                     return;
                 }
                 
                 const types = data.activity_types || [];
+                console.log('Activity types count:', types.length);
+                
                 if (types.length === 0) {
                     document.getElementById('activityTypesBody').innerHTML = `<tr><td colspan="6" style="text-align: center; color: #94a3b8;">Nema zabilježenih aktivnosti.</td></tr>`;
                     return;
@@ -546,8 +553,10 @@
                     `;
                 });
                 
+                console.log('Generated HTML rows:', types.length);
                 document.getElementById('activityTypesBody').innerHTML = html;
             } catch (error) {
+                console.error('Error loading activity types:', error);
                 document.getElementById('activityTypesBody').innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444;">Greška pri učitavanju: ${error.message}</td></tr>`;
             }
         }

@@ -2491,8 +2491,8 @@ def api_admin_activity_types(request: Request):
                         'count': 0
                     }
                 
-                if eco_score != 0:
-                    activity_types[key]['eco_scores'].append(eco_score)
+                # Include all eco_scores, including 0s, for proper min/max/avg calculation
+                activity_types[key]['eco_scores'].append(eco_score)
                 activity_types[key]['count'] += 1
             except Exception:
                 continue
@@ -2500,14 +2500,18 @@ def api_admin_activity_types(request: Request):
         # Calculate average and stats
         result = []
         for key, data in activity_types.items():
-            avg_eco = sum(data['eco_scores']) / len(data['eco_scores']) if data['eco_scores'] else 0
+            eco_scores = data['eco_scores']
+            avg_eco = sum(eco_scores) / len(eco_scores) if eco_scores else 0
+            min_eco = min(eco_scores) if eco_scores else 0
+            max_eco = max(eco_scores) if eco_scores else 0
+            
             result.append({
                 'category': data['category'],
                 'subtype': data['subtype'],
                 'count': data['count'],
                 'avg_eco_score': round(avg_eco, 3),
-                'min_eco_score': min(data['eco_scores']) if data['eco_scores'] else 0,
-                'max_eco_score': max(data['eco_scores']) if data['eco_scores'] else 0
+                'min_eco_score': round(min_eco, 2),
+                'max_eco_score': round(max_eco, 2)
             })
         
         return {"activity_types": sorted(result, key=lambda x: (x['category'], x['subtype']))}
@@ -3143,7 +3147,8 @@ def api_admin_get_activities(request: Request, limit: int = Query(1000)):
             try:
                 a = dict(row) if not isinstance(row, dict) else row
             except Exception:
-                a = {'id': row[0], 'user_id': row[1], 'category': row[3], 'subtype': row[4], 'co2_kg': row[5], 'quantity': row[6], 'unit': row[7], 'created_at': row[9] if len(row) > 9 else None}
+                # Fallback: row indexes are [0]=id, [1]=user_id, [2]=username, [3]=category, [4]=subtype, [5]=co2_kg, [6]=eco_score, [7]=quantity, [8]=unit, [9]=note, [10]=created_at
+                a = {'id': row[0], 'user_id': row[1], 'username': row[2], 'category': row[3], 'subtype': row[4], 'co2_kg': row[5], 'eco_score': row[6] if len(row) > 6 else 0.0, 'quantity': row[7] if len(row) > 7 else None, 'unit': row[8] if len(row) > 8 else None, 'note': row[9] if len(row) > 9 else None, 'created_at': row[10] if len(row) > 10 else None}
             activities.append(a)
         return {"activities": activities}
     except Exception as e:
