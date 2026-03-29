@@ -16,6 +16,9 @@ import random
 import time
 from datetime import date, timedelta, datetime
 
+# Password hashing - must be defined before ensure_permanent_admin()
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+
 # Translations dictionary
 translations = {
     'hr': {
@@ -1264,9 +1267,6 @@ app.add_middleware(SessionMiddleware, secret_key="SUPER_SECRET_KEY")
 SESSION_TIMEOUT_SECONDS = int(os.environ.get('SESSION_TIMEOUT', 60*30))
 # Whether the persistent 'remember_user' cookie should bypass inactivity timeout ("1" true, "0" false)
 REMEMBER_PERSISTS_TIMEOUT = os.environ.get('REMEMBER_PERSISTS_TIMEOUT', '0') == '1'
-
-# Password hashing
-pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 # Helper: check session user is admin
 def is_session_admin(request: Request) -> bool:
