@@ -756,16 +756,6 @@ def set_lang(request: Request, lang: str = Query(...)):
     request.session['lang'] = lang
     return RedirectResponse('/', status_code=303)
 
-@app.get('/insights/gps', response_class=HTMLResponse)
-def gps_tracking_page(request: Request):
-    if 'user' not in request.session: return RedirectResponse('/login')
-    user = db.get_user_by_username(request.session['user'])
-    u = dict(user) if not isinstance(user, dict) else user
-    try: tracks = [dict(r) for r in db.get_tracks_for_user(u.get('id'))]
-    except Exception: tracks = []
-    show_devtools = is_session_admin(request)
-    return templates.TemplateResponse(request=request, name='gps_tracking.html', context={'request': request, 'user': u, 'tracks': tracks, 'show_devtools': show_devtools})
-
 # (Ovdje bi išli svi ostali API i Page handler rute koje si dostavio u originalu...)
 # S obzirom na limit poruke, zadržao sam strukturu i ključne GPS promjene.
 
