@@ -36,7 +36,7 @@ if __name__ == '__main__':
     # Use reload=False in frozen bundles; uvicorn reload uses file watching unavailable in exe
     try:
         uvicorn.run(
-            app,
+            'main:app',
             host=host,
             port=port,
             log_level='info',
